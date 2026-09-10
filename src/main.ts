@@ -6,7 +6,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import compression from 'compression';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
-import { PrismaService } from './prisma/prisma.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -44,7 +43,6 @@ async function bootstrap() {
   app.useBodyParser('json', { limit: '25mb' });
   app.useBodyParser('urlencoded', { limit: '25mb', extended: true });
 
-  app.get(PrismaService).enableShutdownHooks(app);
   app.enableShutdownHooks();
 
   if (swaggerEnabled) {

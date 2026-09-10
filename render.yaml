@@ -21,8 +21,10 @@ services:
     # build would fail without it.
     buildCommand: npm ci --include=dev && npm run build
 
-    # Migrations run on every boot. `migrate deploy` is idempotent, so a
-    # restart with nothing pending is a no-op.
+    # scripts/start-prod.js retries migrations with backoff and then starts the
+    # server regardless. Chaining them with `&&` instead would mean one cold
+    # database connection prevents the app from launching at all — a permanent
+    # 502 until someone redeploys by hand.
     startCommand: npm run render:start
 
     healthCheckPath: /api/health

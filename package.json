@@ -28,7 +28,7 @@
     "prisma:seed": "ts-node prisma/seed.ts",
     "openapi": "ts-node -P tsconfig.json scripts/generate-openapi.ts",
     "postinstall": "prisma generate",
-    "render:start": "prisma migrate deploy && node dist/main"
+    "render:start": "node scripts/start-prod.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.2.3",
