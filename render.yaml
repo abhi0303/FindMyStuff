@@ -1,0 +1,85 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+#
+# Creates the API service and its Postgres database together. In the Render
+# dashboard: New → Blueprint → pick this repo.
+#
+# Region: `ohio` matches Neon's us-east-2, so the app sits next to its
+# database. Put the app near the DATABASE, not near you — one page load makes
+# several queries, and each one pays the round trip. Your own latency to the
+# app is paid once.
+
+services:
+  - type: web
+    name: findmystuff-api
+    runtime: node
+    plan: free
+    region: ohio
+    branch: main
+
+    # --include=dev is required: NODE_ENV=production makes npm skip
+    # devDependencies, and the Nest CLI and TypeScript live there, so the
+    # build would fail without it.
+    buildCommand: npm ci --include=dev && npm run build
+
+    # Migrations run on every boot. `migrate deploy` is idempotent, so a
+    # restart with nothing pending is a no-op.
+    startCommand: npm run render:start
+
+    healthCheckPath: /api/health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # Neon connection strings. `sync: false` means Render prompts you for
+      # the value instead of storing it in this file — never commit these.
+      #   DATABASE_URL -> the POOLED host (contains "-pooler")
+      #   DIRECT_URL   -> the same host WITHOUT "-pooler", used by migrations
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+
+      # Render generates these once and keeps them stable across deploys.
+      # Rotating them logs every user out.
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+
+      - key: JWT_ACCESS_TTL
+        value: 15m
+      - key: JWT_REFRESH_TTL
+        value: 30d
+
+      # Bump this when the terms text changes; every user is re-prompted.
+      - key: TERMS_VERSION
+        value: '2026-09-01'
+
+      # sync: false means "ask me in the dashboard" — set it to your frontend
+      # URL once that is deployed, e.g. https://findmystuff.vercel.app
+      - key: CORS_ORIGINS
+        sync: false
+
+      # Leave the API docs reachable so the frontend developer can browse them.
+      # Set to 'false' before this holds real user data.
+      - key: SWAGGER_ENABLED
+        value: 'true'
+
+      - key: MEDIA_DRIVER
+        value: local
+      - key: MEDIA_LOCAL_PATH
+        value: ./storage/media
+      - key: MEDIA_MAX_BYTES
+        value: '8388608'
+      - key: MEDIA_THUMBNAIL_WIDTH
+        value: '320'
+
+      - key: THROTTLE_TTL_SECONDS
+        value: '60'
+      - key: THROTTLE_LIMIT
+        value: '120'
+      - key: AUTH_THROTTLE_TTL_SECONDS
+        value: '300'
+      - key: AUTH_THROTTLE_LIMIT
+        value: '10'

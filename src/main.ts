@@ -17,6 +17,7 @@ async function bootstrap() {
   const port = config.getOrThrow<number>('port');
   const corsOrigins = config.getOrThrow<string[]>('corsOrigins');
   const isProduction = config.get<string>('env') === 'production';
+  const swaggerEnabled = config.getOrThrow<boolean>('swaggerEnabled');
 
   app.setGlobalPrefix(prefix);
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
@@ -46,7 +47,7 @@ async function bootstrap() {
   app.get(PrismaService).enableShutdownHooks(app);
   app.enableShutdownHooks();
 
-  if (!isProduction) {
+  if (swaggerEnabled) {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('FindMyStuff API')
       .setDescription('Remember where you kept your stuff.')
@@ -60,11 +61,15 @@ async function bootstrap() {
     });
   }
 
-  await app.listen(port);
+  // Must bind 0.0.0.0, not localhost, or a container platform cannot route to it.
+  await app.listen(port, '0.0.0.0');
 
-  logger.log(`FindMyStuff API listening on http://localhost:${port}/${prefix}`);
-  if (!isProduction) {
-    logger.log(`API docs at http://localhost:${port}/${prefix}/docs`);
+  logger.log(`FindMyStuff API listening on port ${port} (prefix /${prefix})`);
+  if (swaggerEnabled) {
+    logger.log(`API docs at /${prefix}/docs`);
+  }
+  if (isProduction && corsOrigins.length === 0) {
+    logger.warn('CORS_ORIGINS is empty in production — every origin is currently allowed');
   }
 }
 

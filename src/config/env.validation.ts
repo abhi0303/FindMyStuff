@@ -10,6 +10,11 @@ class EnvironmentVariables {
   @IsNotEmpty()
   DATABASE_URL!: string;
 
+  /** Unpooled connection used only by migrations. Optional locally. */
+  @IsOptional()
+  @IsString()
+  DIRECT_URL?: string;
+
   // Short secrets are the single most common way a JWT setup gets broken,
   // so the app refuses to boot rather than start insecurely.
   @IsString()

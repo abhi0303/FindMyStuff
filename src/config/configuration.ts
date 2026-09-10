@@ -4,6 +4,7 @@ export interface AppConfig {
   apiPrefix: string;
   corsOrigins: string[];
   termsVersion: string;
+  swaggerEnabled: boolean;
   jwt: {
     accessSecret: string;
     refreshSecret: string;
@@ -38,6 +39,11 @@ export default (): AppConfig => ({
     .map((origin) => origin.trim())
     .filter(Boolean),
   termsVersion: process.env.TERMS_VERSION ?? '1',
+  // Off in production unless explicitly switched on — handy for letting the
+  // frontend developer browse the deployed API.
+  swaggerEnabled:
+    process.env.SWAGGER_ENABLED === 'true' ||
+    (process.env.SWAGGER_ENABLED !== 'false' && process.env.NODE_ENV !== 'production'),
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET ?? '',
     refreshSecret: process.env.JWT_REFRESH_SECRET ?? '',
