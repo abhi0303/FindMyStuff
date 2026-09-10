@@ -1,0 +1,5211 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/health": {
+      "get": {
+        "operationId": "AppController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Liveness and database check",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/media": {
+      "post": {
+        "operationId": "MediaController_upload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMediaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload a base64 image and get a media id back",
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/api/media/{id}": {
+      "get": {
+        "operationId": "MediaController_metadata",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Media metadata",
+        "tags": [
+          "media"
+        ]
+      },
+      "delete": {
+        "operationId": "MediaController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Soft-delete your own media",
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/api/media/{id}/raw": {
+      "get": {
+        "operationId": "MediaController_raw",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Original image bytes",
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/api/media/{id}/thumbnail": {
+      "get": {
+        "operationId": "MediaController_thumbnail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Thumbnail bytes — use this in lists",
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/api/auth/signup": {
+      "post": {
+        "operationId": "AuthController_signup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignupResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create an account. Terms must be accepted here.",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Sign in and receive an access + refresh token pair",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenPairResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Exchange a refresh token for a new pair (rotating)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Revoke a single refresh token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/logout-all": {
+      "post": {
+        "operationId": "AuthController_logoutAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke every session for the current user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Current user, including whether new terms need accepting",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/accept-terms": {
+      "post": {
+        "operationId": "AuthController_acceptTerms",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptTermsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Accept the current terms version",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/change-password": {
+      "post": {
+        "operationId": "AuthController_changePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangePasswordResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change password and sign out every session",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/users/me": {
+      "patch": {
+        "operationId": "UsersController_updateProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update your profile",
+        "tags": [
+          "users"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_deactivate",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Deactivate your account",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/lookup": {
+      "get": {
+        "operationId": "UsersController_lookup",
+        "parameters": [
+          {
+            "name": "email",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserCard"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Find someone by their exact email, to send a friend request",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/friends": {
+      "get": {
+        "operationId": "FriendshipsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FriendResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "People you are connected to",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/friends/requests": {
+      "post": {
+        "operationId": "FriendshipsController_send",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFriendRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FriendshipResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a friend request by email or user id",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/friends/requests/incoming": {
+      "get": {
+        "operationId": "FriendshipsController_incoming",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FriendshipResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Requests waiting for your answer",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/friends/requests/outgoing": {
+      "get": {
+        "operationId": "FriendshipsController_outgoing",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FriendshipResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Requests you have sent",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/friends/requests/{id}/accept": {
+      "post": {
+        "operationId": "FriendshipsController_accept",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FriendshipResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Accept a friend request",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/friends/requests/{id}/reject": {
+      "post": {
+        "operationId": "FriendshipsController_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FriendshipResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reject a friend request",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/friends/{userId}": {
+      "delete": {
+        "operationId": "FriendshipsController_remove",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Disconnect from someone (place access is unaffected)",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/friends/{userId}/block": {
+      "post": {
+        "operationId": "FriendshipsController_block",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FriendshipResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Block someone from contacting you",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/places": {
+      "post": {
+        "operationId": "PlacesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlaceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a house / office / locker",
+        "tags": [
+          "places"
+        ]
+      },
+      "get": {
+        "operationId": "PlacesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlaceListItemResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Places you own or that are shared with you",
+        "tags": [
+          "places"
+        ]
+      }
+    },
+    "/api/places/{placeId}": {
+      "get": {
+        "operationId": "PlacesController_findOne",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceDetailResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One place with its members and counts",
+        "tags": [
+          "places"
+        ]
+      },
+      "patch": {
+        "operationId": "PlacesController_update",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlaceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update place details",
+        "tags": [
+          "places"
+        ]
+      },
+      "delete": {
+        "operationId": "PlacesController_remove",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Soft-delete a place and everything inside it",
+        "tags": [
+          "places"
+        ]
+      }
+    },
+    "/api/places/{placeId}/activity": {
+      "get": {
+        "operationId": "PlacesController_activity",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ActivityLogResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Who did what in this place",
+        "tags": [
+          "places"
+        ]
+      }
+    },
+    "/api/invites/accept": {
+      "post": {
+        "operationId": "MembersController_acceptInvite",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInviteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceMemberResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Redeem an invite code and join that place",
+        "tags": [
+          "members"
+        ]
+      }
+    },
+    "/api/places/{placeId}/members": {
+      "get": {
+        "operationId": "MembersController_list",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlaceMemberResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Everyone with access to this place",
+        "tags": [
+          "members"
+        ]
+      },
+      "post": {
+        "operationId": "MembersController_add",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddMemberDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceMemberResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add an accepted friend to this place",
+        "tags": [
+          "members"
+        ]
+      }
+    },
+    "/api/places/{placeId}/members/{memberId}": {
+      "patch": {
+        "operationId": "MembersController_updateRole",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMemberDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceMemberResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change what someone can do in this place",
+        "tags": [
+          "members"
+        ]
+      },
+      "delete": {
+        "operationId": "MembersController_remove",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove someone from this place",
+        "tags": [
+          "members"
+        ]
+      }
+    },
+    "/api/places/{placeId}/leave": {
+      "post": {
+        "operationId": "MembersController_leave",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Leave a place you were added to",
+        "tags": [
+          "members"
+        ]
+      }
+    },
+    "/api/places/{placeId}/invites": {
+      "post": {
+        "operationId": "MembersController_createInvite",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInviteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceInviteResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create an invite code for someone not on the app yet",
+        "tags": [
+          "members"
+        ]
+      },
+      "get": {
+        "operationId": "MembersController_listInvites",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlaceInviteResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Invite codes that are still open",
+        "tags": [
+          "members"
+        ]
+      }
+    },
+    "/api/places/{placeId}/invites/{inviteId}": {
+      "delete": {
+        "operationId": "MembersController_revokeInvite",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inviteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke an unused invite code",
+        "tags": [
+          "members"
+        ]
+      }
+    },
+    "/api/storages/by-label/{labelCode}": {
+      "get": {
+        "operationId": "StoragesController_findByLabel",
+        "parameters": [
+          {
+            "name": "labelCode",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageDetailResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Look up a storage by its QR sticker code, across all your places",
+        "tags": [
+          "storages"
+        ]
+      }
+    },
+    "/api/places/{placeId}/storages": {
+      "post": {
+        "operationId": "StoragesController_create",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStorageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a storage. Pass parentId to nest it inside another one.",
+        "tags": [
+          "storages"
+        ]
+      },
+      "get": {
+        "operationId": "StoragesController_findAll",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parentId",
+            "required": false,
+            "in": "query",
+            "description": "Only direct children of this storage",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ROOM",
+                "ALMIRAH",
+                "WARDROBE",
+                "CABINET",
+                "SHELF",
+                "DRAWER",
+                "BED",
+                "BOX",
+                "SUITCASE",
+                "BAG",
+                "FRIDGE",
+                "LOFT",
+                "RACK",
+                "DESK",
+                "SAFE",
+                "OTHER"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Match part of the storage name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rootOnly",
+            "required": false,
+            "in": "query",
+            "description": "Return only root storages",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StorageListItemResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Flat list of storages — this feeds the dropdown when adding a thing",
+        "tags": [
+          "storages"
+        ]
+      }
+    },
+    "/api/places/{placeId}/storages/tree": {
+      "get": {
+        "operationId": "StoragesController_tree",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StorageNodeResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Nested tree of every storage in the place",
+        "tags": [
+          "storages"
+        ]
+      }
+    },
+    "/api/places/{placeId}/storages/{storageId}": {
+      "get": {
+        "operationId": "StoragesController_findOne",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "storageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageDetailResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One storage with its children and the items inside it",
+        "tags": [
+          "storages"
+        ]
+      },
+      "patch": {
+        "operationId": "StoragesController_update",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "storageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStorageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Rename, edit, or move a storage (with its whole subtree)",
+        "tags": [
+          "storages"
+        ]
+      },
+      "delete": {
+        "operationId": "StoragesController_remove",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "storageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageDeletedResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a storage and its subtree; items inside become unassigned",
+        "tags": [
+          "storages"
+        ]
+      }
+    },
+    "/api/items/attention": {
+      "get": {
+        "operationId": "ItemsController_attention",
+        "parameters": [
+          {
+            "name": "withinDays",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttentionResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Expiring, out-of-warranty, overdue-to-return and low-stock items everywhere",
+        "tags": [
+          "items"
+        ]
+      }
+    },
+    "/api/places/{placeId}/items": {
+      "post": {
+        "operationId": "ItemsController_create",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemDetailResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a thing and say which storage it went into",
+        "tags": [
+          "items"
+        ]
+      },
+      "get": {
+        "operationId": "ItemsController_findAll",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Free text over name, aliases, tags and description",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "storageId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeNested",
+            "required": false,
+            "in": "query",
+            "description": "Include items in nested storages under storageId",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "AVAILABLE",
+                "LENT_OUT",
+                "CONSUMED",
+                "LOST",
+                "DISCARDED"
+              ]
+            }
+          },
+          {
+            "name": "visibility",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SHARED",
+                "PRIVATE"
+              ]
+            }
+          },
+          {
+            "name": "tag",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expiringInDays",
+            "required": false,
+            "in": "query",
+            "description": "Only items expiring within this many days",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lowStock",
+            "required": false,
+            "in": "query",
+            "description": "Only items at or below their low-stock threshold",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "updatedAt",
+              "type": "string",
+              "enum": [
+                "name",
+                "createdAt",
+                "updatedAt",
+                "expiresAt"
+              ]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedItemsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List and filter the things in a place",
+        "tags": [
+          "items"
+        ]
+      }
+    },
+    "/api/places/{placeId}/items/{itemId}": {
+      "get": {
+        "operationId": "ItemsController_findOne",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemDetailResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One thing, with its photos and recent movements",
+        "tags": [
+          "items"
+        ]
+      },
+      "patch": {
+        "operationId": "ItemsController_update",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemDetailResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a thing",
+        "tags": [
+          "items"
+        ]
+      },
+      "delete": {
+        "operationId": "ItemsController_remove",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Soft-delete a thing",
+        "tags": [
+          "items"
+        ]
+      }
+    },
+    "/api/places/{placeId}/items/{itemId}/history": {
+      "get": {
+        "operationId": "ItemsController_history",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ItemMovementResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Everywhere this thing has been kept",
+        "tags": [
+          "items"
+        ]
+      }
+    },
+    "/api/places/{placeId}/items/{itemId}/move": {
+      "post": {
+        "operationId": "ItemsController_move",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemDetailResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Move a thing to another storage",
+        "tags": [
+          "items"
+        ]
+      }
+    },
+    "/api/places/{placeId}/items/{itemId}/lend": {
+      "post": {
+        "operationId": "ItemsController_lend",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LendItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a thing as lent out",
+        "tags": [
+          "items"
+        ]
+      }
+    },
+    "/api/places/{placeId}/items/{itemId}/return": {
+      "post": {
+        "operationId": "ItemsController_returnItem",
+        "parameters": [
+          {
+            "name": "placeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a lent thing as returned",
+        "tags": [
+          "items"
+        ]
+      }
+    },
+    "/api/search": {
+      "get": {
+        "description": "Typo-tolerant: \"almira\" finds \"Almirah\". Alias-aware: \"charger\" finds \"Type-C cable\". Each result comes back with the full breadcrumb of where it is kept.",
+        "operationId": "SearchController_search",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "description": "What are you looking for?",
+            "schema": {
+              "example": "passport",
+              "type": "string"
+            }
+          },
+          {
+            "name": "placeId",
+            "required": false,
+            "in": "query",
+            "description": "Restrict to one place. Omit to search everywhere.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeStorages",
+            "required": false,
+            "in": "query",
+            "description": "Also return matching storages",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "includeArchived",
+            "required": false,
+            "in": "query",
+            "description": "Include deleted/discarded things",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Find a thing across every place you can see",
+        "tags": [
+          "search"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "FindMyStuff API",
+    "description": "Remember where you kept your stuff.\n\nHierarchy: **Place** (home/office/locker) → **Storage** tree (room → almirah → shelf → box) → **Item**.\n\nEvery place-scoped route is nested under `/places/{placeId}` and is checked against your\nmembership of that place. Asking for a place you are not a member of returns **404**, not 403 —\nthe API never confirms that someone else's data exists.\n\nAll routes except signup, login, refresh, logout and health require\n`Authorization: Bearer <accessToken>`.",
+    "version": "0.1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Signup, login, tokens and terms acceptance"
+    },
+    {
+      "name": "users",
+      "description": "Your profile and looking people up"
+    },
+    {
+      "name": "friends",
+      "description": "Friend requests — the step before sharing a place"
+    },
+    {
+      "name": "places",
+      "description": "Houses, offices, lockers"
+    },
+    {
+      "name": "members",
+      "description": "Who can see a place, and invite codes"
+    },
+    {
+      "name": "storages",
+      "description": "The nested storage tree"
+    },
+    {
+      "name": "items",
+      "description": "The things you keep"
+    },
+    {
+      "name": "search",
+      "description": "Find where you kept something"
+    },
+    {
+      "name": "media",
+      "description": "Photo upload and serving"
+    },
+    {
+      "name": "health",
+      "description": "Liveness"
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded"
+            ],
+            "example": "ok"
+          },
+          "database": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down"
+            ],
+            "example": "up"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "status",
+          "database",
+          "timestamp"
+        ]
+      },
+      "CreateMediaDto": {
+        "type": "object",
+        "properties": {
+          "base64": {
+            "type": "string",
+            "description": "Image as base64. A data URI (\"data:image/jpeg;base64,...\") or raw base64 both work."
+          },
+          "label": {
+            "type": "string",
+            "description": "Optional caption/filename, stored for reference only"
+          }
+        },
+        "required": [
+          "base64"
+        ]
+      },
+      "MediaResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Use this id when creating an item or storage"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mimeType": {
+            "type": "string",
+            "example": "image/jpeg"
+          },
+          "sizeBytes": {
+            "type": "number",
+            "example": 284913
+          },
+          "width": {
+            "type": "object",
+            "nullable": true,
+            "example": 1600
+          },
+          "height": {
+            "type": "object",
+            "nullable": true,
+            "example": 1200
+          },
+          "checksum": {
+            "type": "string",
+            "description": "SHA-256 — re-uploading the same photo reuses the stored file"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "ownerId",
+          "mimeType",
+          "sizeBytes",
+          "width",
+          "height",
+          "checksum",
+          "createdAt"
+        ]
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Home — Demo deleted"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "SignupDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "shristi@example.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "Shristi Gupta"
+          },
+          "password": {
+            "type": "string",
+            "example": "Str0ng#Pass",
+            "minLength": 8
+          },
+          "phone": {
+            "type": "string",
+            "example": "+919876543210"
+          },
+          "acceptTerms": {
+            "type": "boolean",
+            "description": "Must be true. The accepted version is recorded server-side.",
+            "example": true
+          }
+        },
+        "required": [
+          "email",
+          "name",
+          "password",
+          "acceptTerms"
+        ]
+      },
+      "UserProfileResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "example": "shristi@example.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "Shristi Gupta"
+          },
+          "phone": {
+            "type": "object",
+            "nullable": true,
+            "example": "+919876543210"
+          },
+          "avatarMediaId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "termsVersion": {
+            "type": "object",
+            "nullable": true,
+            "example": "2026-09-01"
+          },
+          "termsAcceptedAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "phone",
+          "avatarMediaId",
+          "termsVersion",
+          "termsAcceptedAt",
+          "createdAt"
+        ]
+      },
+      "SignupResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Send as: Authorization: Bearer <accessToken>"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Single use — every refresh returns a new one"
+          },
+          "expiresIn": {
+            "type": "string",
+            "example": "15m",
+            "description": "Lifetime of the access token"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserProfileResponse"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken",
+          "expiresIn",
+          "user"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "shristi@example.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "Str0ng#Pass"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Send as: Authorization: Bearer <accessToken>"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Single use — every refresh returns a new one"
+          },
+          "expiresIn": {
+            "type": "string",
+            "example": "15m",
+            "description": "Lifetime of the access token"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserProfileResponse"
+          },
+          "termsAcceptanceRequired": {
+            "type": "boolean",
+            "example": false
+          },
+          "currentTermsVersion": {
+            "type": "string",
+            "example": "2026-09-01"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken",
+          "expiresIn",
+          "user",
+          "termsAcceptanceRequired",
+          "currentTermsVersion"
+        ]
+      },
+      "RefreshDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "The refresh token issued at login or last refresh"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "TokenPairResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Send as: Authorization: Bearer <accessToken>"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Single use — every refresh returns a new one"
+          },
+          "expiresIn": {
+            "type": "string",
+            "example": "15m",
+            "description": "Lifetime of the access token"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken",
+          "expiresIn"
+        ]
+      },
+      "MeResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "example": "shristi@example.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "Shristi Gupta"
+          },
+          "phone": {
+            "type": "object",
+            "nullable": true,
+            "example": "+919876543210"
+          },
+          "avatarMediaId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "termsVersion": {
+            "type": "object",
+            "nullable": true,
+            "example": "2026-09-01"
+          },
+          "termsAcceptedAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "termsAcceptanceRequired": {
+            "type": "boolean",
+            "example": false,
+            "description": "When true, show the terms dialog — other routes will return 403 until accepted"
+          },
+          "currentTermsVersion": {
+            "type": "string",
+            "example": "2026-09-01"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "phone",
+          "avatarMediaId",
+          "termsVersion",
+          "termsAcceptedAt",
+          "createdAt",
+          "termsAcceptanceRequired",
+          "currentTermsVersion"
+        ]
+      },
+      "AcceptTermsDto": {
+        "type": "object",
+        "properties": {
+          "accept": {
+            "type": "boolean",
+            "example": true
+          },
+          "version": {
+            "type": "string",
+            "description": "Version being accepted. Must match the current server version when provided."
+          }
+        },
+        "required": [
+          "accept"
+        ]
+      },
+      "ChangePasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ]
+      },
+      "ChangePasswordResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Password changed. Please sign in again."
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "avatarBase64": {
+            "type": "string",
+            "description": "Base64 avatar image"
+          }
+        }
+      },
+      "UserCard": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Shristi"
+          },
+          "email": {
+            "type": "string",
+            "example": "shristi@example.com"
+          },
+          "avatarMediaId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "FriendResponse": {
+        "type": "object",
+        "properties": {
+          "friendshipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "since": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "user": {
+            "description": "The other person, whoever sent the request",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserCard"
+              }
+            ]
+          }
+        },
+        "required": [
+          "friendshipId",
+          "since",
+          "user"
+        ]
+      },
+      "CreateFriendRequestDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Either email or userId is required"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "example": "Hi Mummy, adding you so you can see the almirah"
+          }
+        }
+      },
+      "FriendshipResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ACCEPTED",
+              "REJECTED",
+              "BLOCKED"
+            ]
+          },
+          "message": {
+            "type": "object",
+            "nullable": true,
+            "example": "Hi Mummy, adding you"
+          },
+          "requester": {
+            "$ref": "#/components/schemas/UserCard"
+          },
+          "addressee": {
+            "$ref": "#/components/schemas/UserCard"
+          },
+          "respondedAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "message",
+          "requester",
+          "addressee",
+          "respondedAt",
+          "createdAt"
+        ]
+      },
+      "CreatePlaceDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Home — Sector 62"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "HOME",
+              "OFFICE",
+              "LOCKER",
+              "VEHICLE",
+              "STORAGE_UNIT",
+              "OTHER"
+            ],
+            "default": "HOME"
+          },
+          "description": {
+            "type": "string"
+          },
+          "widthValue": {
+            "type": "number",
+            "description": "Optional — most people never measure their rooms"
+          },
+          "lengthValue": {
+            "type": "number"
+          },
+          "heightValue": {
+            "type": "number"
+          },
+          "lengthUnit": {
+            "type": "string",
+            "enum": [
+              "CM",
+              "INCH"
+            ]
+          },
+          "addressLine": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 28.6139
+          },
+          "longitude": {
+            "type": "number",
+            "example": 77.209
+          },
+          "coverImageBase64": {
+            "type": "string",
+            "description": "Base64 cover photo of the place"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "PlaceResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Home — Sector 62"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "HOME",
+              "OFFICE",
+              "LOCKER",
+              "VEHICLE",
+              "STORAGE_UNIT",
+              "OTHER"
+            ]
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "city": {
+            "type": "object",
+            "nullable": true,
+            "example": "Noida"
+          },
+          "country": {
+            "type": "object",
+            "nullable": true,
+            "example": "India"
+          },
+          "latitude": {
+            "type": "object",
+            "nullable": true,
+            "example": 28.6139
+          },
+          "longitude": {
+            "type": "object",
+            "nullable": true,
+            "example": 77.209
+          },
+          "coverMediaId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "description",
+          "ownerId",
+          "city",
+          "country",
+          "latitude",
+          "longitude",
+          "coverMediaId",
+          "createdAt"
+        ]
+      },
+      "PlaceListItemResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Home — Sector 62"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "HOME",
+              "OFFICE",
+              "LOCKER",
+              "VEHICLE",
+              "STORAGE_UNIT",
+              "OTHER"
+            ]
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "city": {
+            "type": "object",
+            "nullable": true,
+            "example": "Noida"
+          },
+          "country": {
+            "type": "object",
+            "nullable": true,
+            "example": "India"
+          },
+          "latitude": {
+            "type": "object",
+            "nullable": true,
+            "example": 28.6139
+          },
+          "longitude": {
+            "type": "object",
+            "nullable": true,
+            "example": 77.209
+          },
+          "coverMediaId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "myRole": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "ADMIN",
+              "MEMBER",
+              "VIEWER"
+            ],
+            "description": "Your role in this place"
+          },
+          "memberCount": {
+            "type": "number",
+            "example": 2
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserCard"
+            }
+          },
+          "storageCount": {
+            "type": "number",
+            "example": 5
+          },
+          "itemCount": {
+            "type": "number",
+            "example": 12,
+            "description": "Excludes other people's private items"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "description",
+          "ownerId",
+          "city",
+          "country",
+          "latitude",
+          "longitude",
+          "coverMediaId",
+          "createdAt",
+          "myRole",
+          "memberCount",
+          "members",
+          "storageCount",
+          "itemCount"
+        ]
+      },
+      "PlaceMemberResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "ADMIN",
+              "MEMBER",
+              "VIEWER"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "INVITED",
+              "ACTIVE",
+              "REMOVED"
+            ]
+          },
+          "joinedAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserCard"
+          },
+          "invitedBy": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserCard"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "status",
+          "joinedAt",
+          "user"
+        ]
+      },
+      "PlaceDetailResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Home — Sector 62"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "HOME",
+              "OFFICE",
+              "LOCKER",
+              "VEHICLE",
+              "STORAGE_UNIT",
+              "OTHER"
+            ]
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "city": {
+            "type": "object",
+            "nullable": true,
+            "example": "Noida"
+          },
+          "country": {
+            "type": "object",
+            "nullable": true,
+            "example": "India"
+          },
+          "latitude": {
+            "type": "object",
+            "nullable": true,
+            "example": 28.6139
+          },
+          "longitude": {
+            "type": "object",
+            "nullable": true,
+            "example": 77.209
+          },
+          "coverMediaId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserCard"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlaceMemberResponse"
+            }
+          },
+          "myRole": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "ADMIN",
+              "MEMBER",
+              "VIEWER"
+            ]
+          },
+          "storageCount": {
+            "type": "number",
+            "example": 5
+          },
+          "itemCount": {
+            "type": "number",
+            "example": 12
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "description",
+          "ownerId",
+          "city",
+          "country",
+          "latitude",
+          "longitude",
+          "coverMediaId",
+          "createdAt",
+          "owner",
+          "members",
+          "myRole",
+          "storageCount",
+          "itemCount"
+        ]
+      },
+      "UpdatePlaceDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Home — Sector 62"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "HOME",
+              "OFFICE",
+              "LOCKER",
+              "VEHICLE",
+              "STORAGE_UNIT",
+              "OTHER"
+            ],
+            "default": "HOME"
+          },
+          "description": {
+            "type": "string"
+          },
+          "widthValue": {
+            "type": "number",
+            "description": "Optional — most people never measure their rooms"
+          },
+          "lengthValue": {
+            "type": "number"
+          },
+          "heightValue": {
+            "type": "number"
+          },
+          "lengthUnit": {
+            "type": "string",
+            "enum": [
+              "CM",
+              "INCH"
+            ]
+          },
+          "addressLine": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 28.6139
+          },
+          "longitude": {
+            "type": "number",
+            "example": 77.209
+          },
+          "coverImageBase64": {
+            "type": "string",
+            "description": "Base64 cover photo of the place"
+          }
+        }
+      },
+      "ActivityLogResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "example": "ITEM_MOVED"
+          },
+          "entityType": {
+            "type": "string",
+            "example": "Item"
+          },
+          "entityId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "summary": {
+            "type": "string",
+            "example": "Moved \"Passport\" to Bedroom › Almirah › Top shelf"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/UserCard"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "action",
+          "entityType",
+          "entityId",
+          "summary",
+          "actor",
+          "createdAt"
+        ]
+      },
+      "AcceptInviteDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "FMS-INV-7K3QX2"
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "AddMemberDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "Must already be an accepted friend"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "ADMIN",
+              "MEMBER",
+              "VIEWER"
+            ],
+            "default": "MEMBER"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "UpdateMemberDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "ADMIN",
+              "MEMBER",
+              "VIEWER"
+            ]
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "CreateInviteDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Who the invite is for — used to prefill and to notify"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "ADMIN",
+              "MEMBER",
+              "VIEWER"
+            ],
+            "default": "MEMBER"
+          },
+          "expiresInDays": {
+            "type": "number",
+            "default": 7,
+            "minimum": 1,
+            "maximum": 90
+          }
+        }
+      },
+      "PlaceInviteResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "INV-ZJ5Y0YAP",
+            "description": "Share this code with the person"
+          },
+          "email": {
+            "type": "object",
+            "nullable": true,
+            "example": "mum@example.com"
+          },
+          "phone": {
+            "type": "object",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "ADMIN",
+              "MEMBER",
+              "VIEWER"
+            ]
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "acceptedAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "email",
+          "phone",
+          "role",
+          "expiresAt",
+          "acceptedAt"
+        ]
+      },
+      "StorageResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "placeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid",
+            "description": "Null for a top-level storage"
+          },
+          "name": {
+            "type": "string",
+            "example": "Almirah"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ROOM",
+              "ALMIRAH",
+              "WARDROBE",
+              "CABINET",
+              "SHELF",
+              "DRAWER",
+              "BED",
+              "BOX",
+              "SUITCASE",
+              "BAG",
+              "FRIDGE",
+              "LOFT",
+              "RACK",
+              "DESK",
+              "SAFE",
+              "OTHER"
+            ]
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "example": "3f2a…/9b1c…",
+            "description": "Ancestor ids, root first, slash separated. Empty for a root storage."
+          },
+          "level": {
+            "type": "number",
+            "example": 2,
+            "description": "Depth in the tree; 0 is top level"
+          },
+          "labelCode": {
+            "type": "string",
+            "example": "FMS-7K3QX2",
+            "description": "Print this as a QR sticker on the box"
+          },
+          "coverMediaId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "placeId",
+          "parentId",
+          "name",
+          "type",
+          "description",
+          "path",
+          "level",
+          "labelCode",
+          "coverMediaId",
+          "createdAt"
+        ]
+      },
+      "StorageDetailResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "placeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid",
+            "description": "Null for a top-level storage"
+          },
+          "name": {
+            "type": "string",
+            "example": "Almirah"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ROOM",
+              "ALMIRAH",
+              "WARDROBE",
+              "CABINET",
+              "SHELF",
+              "DRAWER",
+              "BED",
+              "BOX",
+              "SUITCASE",
+              "BAG",
+              "FRIDGE",
+              "LOFT",
+              "RACK",
+              "DESK",
+              "SAFE",
+              "OTHER"
+            ]
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "example": "3f2a…/9b1c…",
+            "description": "Ancestor ids, root first, slash separated. Empty for a root storage."
+          },
+          "level": {
+            "type": "number",
+            "example": 2,
+            "description": "Depth in the tree; 0 is top level"
+          },
+          "labelCode": {
+            "type": "string",
+            "example": "FMS-7K3QX2",
+            "description": "Print this as a QR sticker on the box"
+          },
+          "coverMediaId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "breadcrumb": {
+            "type": "string",
+            "example": "Bedroom › Almirah › Top shelf"
+          },
+          "children": {
+            "description": "Direct children only",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StorageResponse"
+            }
+          },
+          "items": {
+            "type": "array",
+            "description": "Items directly inside this storage",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "placeId",
+          "parentId",
+          "name",
+          "type",
+          "description",
+          "path",
+          "level",
+          "labelCode",
+          "coverMediaId",
+          "createdAt",
+          "breadcrumb",
+          "children"
+        ]
+      },
+      "CreateStorageDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Almirah"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ROOM",
+              "ALMIRAH",
+              "WARDROBE",
+              "CABINET",
+              "SHELF",
+              "DRAWER",
+              "BED",
+              "BOX",
+              "SUITCASE",
+              "BAG",
+              "FRIDGE",
+              "LOFT",
+              "RACK",
+              "DESK",
+              "SAFE",
+              "OTHER"
+            ],
+            "default": "OTHER"
+          },
+          "parentId": {
+            "type": "string",
+            "description": "Parent storage id. Omit for a top-level storage such as a room."
+          },
+          "description": {
+            "type": "string"
+          },
+          "widthValue": {
+            "type": "number"
+          },
+          "lengthValue": {
+            "type": "number"
+          },
+          "heightValue": {
+            "type": "number"
+          },
+          "lengthUnit": {
+            "type": "string",
+            "enum": [
+              "CM",
+              "INCH"
+            ]
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Useful for a bank locker or a box kept elsewhere"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "coverImageBase64": {
+            "type": "string",
+            "description": "Base64 photo of the storage, e.g. the open almirah"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "StorageListItemResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "placeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid",
+            "description": "Null for a top-level storage"
+          },
+          "name": {
+            "type": "string",
+            "example": "Almirah"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ROOM",
+              "ALMIRAH",
+              "WARDROBE",
+              "CABINET",
+              "SHELF",
+              "DRAWER",
+              "BED",
+              "BOX",
+              "SUITCASE",
+              "BAG",
+              "FRIDGE",
+              "LOFT",
+              "RACK",
+              "DESK",
+              "SAFE",
+              "OTHER"
+            ]
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "example": "3f2a…/9b1c…",
+            "description": "Ancestor ids, root first, slash separated. Empty for a root storage."
+          },
+          "level": {
+            "type": "number",
+            "example": 2,
+            "description": "Depth in the tree; 0 is top level"
+          },
+          "labelCode": {
+            "type": "string",
+            "example": "FMS-7K3QX2",
+            "description": "Print this as a QR sticker on the box"
+          },
+          "coverMediaId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "breadcrumb": {
+            "type": "string",
+            "example": "Bedroom › Almirah › Top shelf",
+            "description": "Ready to render — ancestor names resolved at read time"
+          },
+          "itemCount": {
+            "type": "number",
+            "example": 4
+          }
+        },
+        "required": [
+          "id",
+          "placeId",
+          "parentId",
+          "name",
+          "type",
+          "description",
+          "path",
+          "level",
+          "labelCode",
+          "coverMediaId",
+          "createdAt",
+          "breadcrumb",
+          "itemCount"
+        ]
+      },
+      "StorageNodeResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "placeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid",
+            "description": "Null for a top-level storage"
+          },
+          "name": {
+            "type": "string",
+            "example": "Almirah"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ROOM",
+              "ALMIRAH",
+              "WARDROBE",
+              "CABINET",
+              "SHELF",
+              "DRAWER",
+              "BED",
+              "BOX",
+              "SUITCASE",
+              "BAG",
+              "FRIDGE",
+              "LOFT",
+              "RACK",
+              "DESK",
+              "SAFE",
+              "OTHER"
+            ]
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "example": "3f2a…/9b1c…",
+            "description": "Ancestor ids, root first, slash separated. Empty for a root storage."
+          },
+          "level": {
+            "type": "number",
+            "example": 2,
+            "description": "Depth in the tree; 0 is top level"
+          },
+          "labelCode": {
+            "type": "string",
+            "example": "FMS-7K3QX2",
+            "description": "Print this as a QR sticker on the box"
+          },
+          "coverMediaId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "children": {
+            "description": "Nested child storages",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StorageNodeResponse"
+            }
+          },
+          "itemCount": {
+            "type": "number",
+            "example": 4
+          }
+        },
+        "required": [
+          "id",
+          "placeId",
+          "parentId",
+          "name",
+          "type",
+          "description",
+          "path",
+          "level",
+          "labelCode",
+          "coverMediaId",
+          "createdAt",
+          "children",
+          "itemCount"
+        ]
+      },
+      "UpdateStorageDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Almirah"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ROOM",
+              "ALMIRAH",
+              "WARDROBE",
+              "CABINET",
+              "SHELF",
+              "DRAWER",
+              "BED",
+              "BOX",
+              "SUITCASE",
+              "BAG",
+              "FRIDGE",
+              "LOFT",
+              "RACK",
+              "DESK",
+              "SAFE",
+              "OTHER"
+            ],
+            "default": "OTHER"
+          },
+          "description": {
+            "type": "string"
+          },
+          "widthValue": {
+            "type": "number"
+          },
+          "lengthValue": {
+            "type": "number"
+          },
+          "heightValue": {
+            "type": "number"
+          },
+          "lengthUnit": {
+            "type": "string",
+            "enum": [
+              "CM",
+              "INCH"
+            ]
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Useful for a bank locker or a box kept elsewhere"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "coverImageBase64": {
+            "type": "string",
+            "description": "Base64 photo of the storage, e.g. the open almirah"
+          },
+          "parentId": {
+            "type": "object",
+            "description": "Move this storage (and everything inside it) under another storage. Pass null to move it to the top level.",
+            "nullable": true
+          }
+        }
+      },
+      "StorageDeletedResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Deleted 3 storage(s). 7 item(s) are now unassigned."
+          },
+          "storages": {
+            "type": "number",
+            "example": 3,
+            "description": "Storages soft-deleted, including the subtree"
+          },
+          "items": {
+            "type": "number",
+            "example": 7,
+            "description": "Items that became unassigned rather than deleted"
+          }
+        },
+        "required": [
+          "success",
+          "message",
+          "storages",
+          "items"
+        ]
+      },
+      "AttentionItemResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Paracetamol strip"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 2
+          },
+          "expiresAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "storage": {
+            "type": "object",
+            "nullable": true
+          },
+          "place": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "quantity",
+          "expiresAt"
+        ]
+      },
+      "AttentionResponse": {
+        "type": "object",
+        "properties": {
+          "expiring": {
+            "description": "Expiring soon or already expired",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttentionItemResponse"
+            }
+          },
+          "warranty": {
+            "description": "Warranty running out",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttentionItemResponse"
+            }
+          },
+          "overdue": {
+            "description": "Lent out and past the due date",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttentionItemResponse"
+            }
+          },
+          "lowStock": {
+            "description": "At or below the low-stock threshold",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttentionItemResponse"
+            }
+          }
+        },
+        "required": [
+          "expiring",
+          "warranty",
+          "overdue",
+          "lowStock"
+        ]
+      },
+      "CreateItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Passport"
+          },
+          "storageId": {
+            "type": "string",
+            "description": "Where it is kept. Omit if not put away yet."
+          },
+          "description": {
+            "type": "string"
+          },
+          "aliases": {
+            "description": "Other names you might search by, e.g. [\"charger\"] for a Type-C cable",
+            "example": [
+              "charger",
+              "cable"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "example": [
+              "documents",
+              "important"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "category": {
+            "type": "string",
+            "example": "Documents"
+          },
+          "quantity": {
+            "type": "number",
+            "default": 1
+          },
+          "lowStockAt": {
+            "type": "number",
+            "description": "Warn when quantity drops to this number"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "SHARED",
+              "PRIVATE"
+            ],
+            "default": "SHARED",
+            "description": "PRIVATE hides this item from every other member of the place"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "purchasedAt": {
+            "type": "string",
+            "example": "2026-01-15T00:00:00.000Z"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "Medicines, food, documents"
+          },
+          "warrantyUntil": {
+            "type": "string"
+          },
+          "remindAt": {
+            "type": "string",
+            "description": "Remind me about this item at this time"
+          },
+          "imagesBase64": {
+            "description": "Base64 photos of where it is kept. First one becomes the cover.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "ItemStorageRef": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Top shelf"
+          },
+          "breadcrumb": {
+            "type": "string",
+            "example": "Bedroom › Almirah › Top shelf",
+            "description": "Where the thing is — render this directly"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "breadcrumb"
+        ]
+      },
+      "ItemMovementResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromStorageId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "toStorageId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "fromLabel": {
+            "type": "object",
+            "nullable": true,
+            "example": "Bedroom › Almirah › Top shelf"
+          },
+          "toLabel": {
+            "type": "object",
+            "nullable": true,
+            "example": "Bedroom › Under the bed › Blue box"
+          },
+          "note": {
+            "type": "object",
+            "nullable": true,
+            "example": "Shifted while cleaning"
+          },
+          "movedBy": {
+            "$ref": "#/components/schemas/UserCard"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "fromStorageId",
+          "toStorageId",
+          "fromLabel",
+          "toLabel",
+          "note",
+          "movedBy",
+          "createdAt"
+        ]
+      },
+      "ItemDetailResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "placeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Passport"
+          },
+          "description": {
+            "type": "object",
+            "nullable": true,
+            "example": "Inside the brown document folder"
+          },
+          "aliases": {
+            "example": [
+              "charger",
+              "cable"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "example": [
+              "documents",
+              "important"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "category": {
+            "type": "object",
+            "nullable": true,
+            "example": "Documents"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 1
+          },
+          "lowStockAt": {
+            "type": "object",
+            "nullable": true,
+            "example": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "LENT_OUT",
+              "CONSUMED",
+              "LOST",
+              "DISCARDED"
+            ]
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "SHARED",
+              "PRIVATE"
+            ],
+            "description": "PRIVATE is visible only to ownerId"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expiresAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "warrantyUntil": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "lentToName": {
+            "type": "object",
+            "nullable": true,
+            "example": "Rahul (neighbour)"
+          },
+          "dueAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "storage": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ItemStorageRef"
+              }
+            ]
+          },
+          "mediaIds": {
+            "description": "Fetch each at /media/{id}/thumbnail or /media/{id}/raw",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserCard"
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/UserCard"
+          },
+          "movements": {
+            "description": "20 most recent moves",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemMovementResponse"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "placeId",
+          "name",
+          "description",
+          "aliases",
+          "tags",
+          "category",
+          "quantity",
+          "lowStockAt",
+          "status",
+          "visibility",
+          "ownerId",
+          "expiresAt",
+          "warrantyUntil",
+          "lentToName",
+          "dueAt",
+          "storage",
+          "mediaIds",
+          "updatedAt",
+          "owner",
+          "createdBy",
+          "movements"
+        ]
+      },
+      "ItemResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "placeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Passport"
+          },
+          "description": {
+            "type": "object",
+            "nullable": true,
+            "example": "Inside the brown document folder"
+          },
+          "aliases": {
+            "example": [
+              "charger",
+              "cable"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "example": [
+              "documents",
+              "important"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "category": {
+            "type": "object",
+            "nullable": true,
+            "example": "Documents"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 1
+          },
+          "lowStockAt": {
+            "type": "object",
+            "nullable": true,
+            "example": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "LENT_OUT",
+              "CONSUMED",
+              "LOST",
+              "DISCARDED"
+            ]
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "SHARED",
+              "PRIVATE"
+            ],
+            "description": "PRIVATE is visible only to ownerId"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expiresAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "warrantyUntil": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "lentToName": {
+            "type": "object",
+            "nullable": true,
+            "example": "Rahul (neighbour)"
+          },
+          "dueAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "storage": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ItemStorageRef"
+              }
+            ]
+          },
+          "mediaIds": {
+            "description": "Fetch each at /media/{id}/thumbnail or /media/{id}/raw",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "placeId",
+          "name",
+          "description",
+          "aliases",
+          "tags",
+          "category",
+          "quantity",
+          "lowStockAt",
+          "status",
+          "visibility",
+          "ownerId",
+          "expiresAt",
+          "warrantyUntil",
+          "lentToName",
+          "dueAt",
+          "storage",
+          "mediaIds",
+          "updatedAt"
+        ]
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "example": 1
+          },
+          "limit": {
+            "type": "number",
+            "example": 20
+          },
+          "total": {
+            "type": "number",
+            "example": 37
+          },
+          "totalPages": {
+            "type": "number",
+            "example": 2
+          },
+          "hasNext": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "page",
+          "limit",
+          "total",
+          "totalPages",
+          "hasNext"
+        ]
+      },
+      "PaginatedItemsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemResponse"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "UpdateItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Passport"
+          },
+          "description": {
+            "type": "string"
+          },
+          "aliases": {
+            "description": "Other names you might search by, e.g. [\"charger\"] for a Type-C cable",
+            "example": [
+              "charger",
+              "cable"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "example": [
+              "documents",
+              "important"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "category": {
+            "type": "string",
+            "example": "Documents"
+          },
+          "quantity": {
+            "type": "number",
+            "default": 1
+          },
+          "lowStockAt": {
+            "type": "number",
+            "description": "Warn when quantity drops to this number"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "SHARED",
+              "PRIVATE"
+            ],
+            "default": "SHARED",
+            "description": "PRIVATE hides this item from every other member of the place"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "purchasedAt": {
+            "type": "string",
+            "example": "2026-01-15T00:00:00.000Z"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "Medicines, food, documents"
+          },
+          "warrantyUntil": {
+            "type": "string"
+          },
+          "remindAt": {
+            "type": "string",
+            "description": "Remind me about this item at this time"
+          },
+          "imagesBase64": {
+            "description": "Base64 photos of where it is kept. First one becomes the cover.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "storageId": {
+            "type": "object",
+            "description": "Move the item. Pass null to mark it as not put away anywhere.",
+            "nullable": true
+          }
+        }
+      },
+      "MoveItemDto": {
+        "type": "object",
+        "properties": {
+          "toStorageId": {
+            "type": "object",
+            "nullable": true,
+            "description": "Destination storage, or null to unassign"
+          },
+          "note": {
+            "type": "string",
+            "example": "Shifted while cleaning"
+          }
+        },
+        "required": [
+          "toStorageId"
+        ]
+      },
+      "LendItemDto": {
+        "type": "object",
+        "properties": {
+          "lentToName": {
+            "type": "string",
+            "example": "Rahul (neighbour)"
+          },
+          "lentToId": {
+            "type": "string",
+            "description": "App user id, when you lent it to someone on FindMyStuff"
+          },
+          "dueAt": {
+            "type": "string",
+            "description": "When you expect it back"
+          }
+        },
+        "required": [
+          "lentToName"
+        ]
+      },
+      "PlaceCard": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Home — Sector 62"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "SearchItemStorage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Top shelf"
+          },
+          "breadcrumb": {
+            "type": "string",
+            "example": "Home › Bedroom › Almirah › Top shelf",
+            "description": "Includes the place name — this is the answer to \"where did I keep it\""
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "breadcrumb"
+        ]
+      },
+      "SearchItemResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Passport"
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "quantity": {
+            "type": "number",
+            "example": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "LENT_OUT",
+              "CONSUMED",
+              "LOST",
+              "DISCARDED"
+            ]
+          },
+          "expiresAt": {
+            "type": "object",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "mediaId": {
+            "type": "object",
+            "nullable": true,
+            "format": "uuid",
+            "description": "Cover photo, if any"
+          },
+          "place": {
+            "$ref": "#/components/schemas/PlaceCard"
+          },
+          "storage": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SearchItemStorage"
+              }
+            ]
+          },
+          "score": {
+            "type": "number",
+            "example": 2.43,
+            "description": "Relevance; results are already sorted by it"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "tags",
+          "aliases",
+          "quantity",
+          "status",
+          "expiresAt",
+          "mediaId",
+          "place",
+          "storage",
+          "score",
+          "updatedAt"
+        ]
+      },
+      "SearchStorageResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Almirah"
+          },
+          "type": {
+            "type": "string",
+            "example": "ALMIRAH"
+          },
+          "labelCode": {
+            "type": "string",
+            "example": "FMS-0QN5EP"
+          },
+          "itemCount": {
+            "type": "number",
+            "example": 4
+          },
+          "place": {
+            "$ref": "#/components/schemas/PlaceCard"
+          },
+          "breadcrumb": {
+            "type": "string",
+            "example": "Home › Bedroom › Almirah"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "labelCode",
+          "itemCount",
+          "place",
+          "breadcrumb"
+        ]
+      },
+      "SearchResponse": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "example": "charger",
+            "description": "Echo of what was searched"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchItemResult"
+            }
+          },
+          "meta": {
+            "description": "Pagination for items only",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaginationMeta"
+              }
+            ]
+          },
+          "storages": {
+            "description": "Storages whose own name matched, capped at 10",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchStorageResult"
+            }
+          }
+        },
+        "required": [
+          "query",
+          "items",
+          "meta",
+          "storages"
+        ]
+      }
+    }
+  }
+}

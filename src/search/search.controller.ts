@@ -3,6 +3,8 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { SearchQueryDto } from './dto/search-query.dto';
 import { SearchService } from './search.service';
+import { ApiOkResponse } from '@nestjs/swagger';
+import { SearchResponse } from './dto/search-response.dto';
 
 @ApiTags('search')
 @ApiBearerAuth()
@@ -17,6 +19,7 @@ export class SearchController {
       'Typo-tolerant: "almira" finds "Almirah". Alias-aware: "charger" finds "Type-C cable". ' +
       'Each result comes back with the full breadcrumb of where it is kept.',
   })
+  @ApiOkResponse({ type: SearchResponse })
   search(@CurrentUser('id') userId: string, @Query() query: SearchQueryDto) {
     return this.searchService.search(userId, query);
   }

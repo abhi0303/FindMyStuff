@@ -22,6 +22,15 @@ import { MoveItemDto } from './dto/move-item.dto';
 import { QueryItemDto } from './dto/query-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemsService } from './items.service';
+import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import {
+  AttentionResponse,
+  ItemDetailResponse,
+  ItemMovementResponse,
+  ItemResponse,
+  PaginatedItemsResponse,
+} from './dto/item-response.dto';
+import { SuccessResponse } from '../common/dto/response.dto';
 
 @ApiTags('items')
 @ApiBearerAuth()
@@ -33,6 +42,7 @@ export class ItemsController {
   @ApiOperation({
     summary: 'Expiring, out-of-warranty, overdue-to-return and low-stock items everywhere',
   })
+  @ApiOkResponse({ type: AttentionResponse })
   attention(@CurrentUser('id') userId: string, @Query('withinDays') withinDays?: string) {
     return this.itemsService.attention(userId, withinDays ? Number(withinDays) : undefined);
   }
@@ -41,6 +51,7 @@ export class ItemsController {
   @UseGuards(PlaceMemberGuard)
   @PlaceRoles(MemberRole.MEMBER)
   @ApiOperation({ summary: 'Add a thing and say which storage it went into' })
+  @ApiCreatedResponse({ type: ItemDetailResponse })
   create(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,
@@ -52,6 +63,7 @@ export class ItemsController {
   @Get('places/:placeId/items')
   @UseGuards(PlaceMemberGuard)
   @ApiOperation({ summary: 'List and filter the things in a place' })
+  @ApiOkResponse({ type: PaginatedItemsResponse })
   findAll(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,
@@ -63,6 +75,7 @@ export class ItemsController {
   @Get('places/:placeId/items/:itemId')
   @UseGuards(PlaceMemberGuard)
   @ApiOperation({ summary: 'One thing, with its photos and recent movements' })
+  @ApiOkResponse({ type: ItemDetailResponse })
   findOne(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,
@@ -74,6 +87,7 @@ export class ItemsController {
   @Get('places/:placeId/items/:itemId/history')
   @UseGuards(PlaceMemberGuard)
   @ApiOperation({ summary: 'Everywhere this thing has been kept' })
+  @ApiOkResponse({ type: [ItemMovementResponse] })
   history(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,
@@ -85,6 +99,7 @@ export class ItemsController {
   @Patch('places/:placeId/items/:itemId')
   @UseGuards(PlaceMemberGuard)
   @ApiOperation({ summary: 'Edit a thing' })
+  @ApiOkResponse({ type: ItemDetailResponse })
   update(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,
@@ -98,6 +113,7 @@ export class ItemsController {
   @Post('places/:placeId/items/:itemId/move')
   @UseGuards(PlaceMemberGuard)
   @ApiOperation({ summary: 'Move a thing to another storage' })
+  @ApiOkResponse({ type: ItemDetailResponse })
   move(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,
@@ -111,6 +127,7 @@ export class ItemsController {
   @Post('places/:placeId/items/:itemId/lend')
   @UseGuards(PlaceMemberGuard)
   @ApiOperation({ summary: 'Mark a thing as lent out' })
+  @ApiOkResponse({ type: ItemResponse })
   lend(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,
@@ -124,6 +141,7 @@ export class ItemsController {
   @Post('places/:placeId/items/:itemId/return')
   @UseGuards(PlaceMemberGuard)
   @ApiOperation({ summary: 'Mark a lent thing as returned' })
+  @ApiOkResponse({ type: ItemResponse })
   returnItem(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,
@@ -136,6 +154,7 @@ export class ItemsController {
   @Delete('places/:placeId/items/:itemId')
   @UseGuards(PlaceMemberGuard)
   @ApiOperation({ summary: 'Soft-delete a thing' })
+  @ApiOkResponse({ type: SuccessResponse })
   remove(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,

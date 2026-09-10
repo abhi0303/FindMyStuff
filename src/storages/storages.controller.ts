@@ -19,6 +19,14 @@ import { CreateStorageDto } from './dto/create-storage.dto';
 import { QueryStorageDto } from './dto/query-storage.dto';
 import { UpdateStorageDto } from './dto/update-storage.dto';
 import { StoragesService } from './storages.service';
+import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import {
+  StorageDeletedResponse,
+  StorageDetailResponse,
+  StorageListItemResponse,
+  StorageNodeResponse,
+  StorageResponse,
+} from './dto/storage-response.dto';
 
 @ApiTags('storages')
 @ApiBearerAuth()
@@ -28,6 +36,7 @@ export class StoragesController {
 
   @Get('storages/by-label/:labelCode')
   @ApiOperation({ summary: 'Look up a storage by its QR sticker code, across all your places' })
+  @ApiOkResponse({ type: StorageDetailResponse })
   findByLabel(@CurrentUser('id') userId: string, @Param('labelCode') labelCode: string) {
     return this.storagesService.findByLabel(userId, labelCode);
   }
@@ -36,6 +45,7 @@ export class StoragesController {
   @UseGuards(PlaceMemberGuard)
   @PlaceRoles(MemberRole.MEMBER)
   @ApiOperation({ summary: 'Add a storage. Pass parentId to nest it inside another one.' })
+  @ApiCreatedResponse({ type: StorageResponse })
   create(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,
@@ -47,6 +57,7 @@ export class StoragesController {
   @Get('places/:placeId/storages')
   @UseGuards(PlaceMemberGuard)
   @ApiOperation({ summary: 'Flat list of storages — this feeds the dropdown when adding a thing' })
+  @ApiOkResponse({ type: [StorageListItemResponse] })
   findAll(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,
@@ -58,6 +69,7 @@ export class StoragesController {
   @Get('places/:placeId/storages/tree')
   @UseGuards(PlaceMemberGuard)
   @ApiOperation({ summary: 'Nested tree of every storage in the place' })
+  @ApiOkResponse({ type: [StorageNodeResponse] })
   tree(@CurrentUser('id') userId: string, @Param('placeId', ParseUUIDPipe) placeId: string) {
     return this.storagesService.tree(userId, placeId);
   }
@@ -65,6 +77,7 @@ export class StoragesController {
   @Get('places/:placeId/storages/:storageId')
   @UseGuards(PlaceMemberGuard)
   @ApiOperation({ summary: 'One storage with its children and the items inside it' })
+  @ApiOkResponse({ type: StorageDetailResponse })
   findOne(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,
@@ -77,6 +90,7 @@ export class StoragesController {
   @UseGuards(PlaceMemberGuard)
   @PlaceRoles(MemberRole.MEMBER)
   @ApiOperation({ summary: 'Rename, edit, or move a storage (with its whole subtree)' })
+  @ApiOkResponse({ type: StorageResponse })
   update(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,
@@ -90,6 +104,7 @@ export class StoragesController {
   @UseGuards(PlaceMemberGuard)
   @PlaceRoles(MemberRole.ADMIN)
   @ApiOperation({ summary: 'Delete a storage and its subtree; items inside become unassigned' })
+  @ApiOkResponse({ type: StorageDeletedResponse })
   remove(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,

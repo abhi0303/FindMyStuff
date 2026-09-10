@@ -51,7 +51,7 @@ async function bootstrap() {
       .setTitle('FindMyStuff API')
       .setDescription('Remember where you kept your stuff.')
       .setVersion('0.1.0')
-      .addBearerAuth()
+      .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'bearer')
       .build();
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);

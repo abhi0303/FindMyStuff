@@ -20,6 +20,14 @@ import { PlaceMemberGuard } from '../common/guards/place-member.guard';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import { PlacesService } from './places.service';
+import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import {
+  ActivityLogResponse,
+  PlaceDetailResponse,
+  PlaceListItemResponse,
+  PlaceResponse,
+} from './dto/place-response.dto';
+import { SuccessResponse } from '../common/dto/response.dto';
 
 @ApiTags('places')
 @ApiBearerAuth()
@@ -32,12 +40,14 @@ export class PlacesController {
 
   @Post()
   @ApiOperation({ summary: 'Create a house / office / locker' })
+  @ApiCreatedResponse({ type: PlaceResponse })
   create(@CurrentUser('id') userId: string, @Body() dto: CreatePlaceDto) {
     return this.placesService.create(userId, dto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Places you own or that are shared with you' })
+  @ApiOkResponse({ type: [PlaceListItemResponse] })
   findAll(@CurrentUser('id') userId: string) {
     return this.placesService.findAllForUser(userId);
   }
@@ -45,6 +55,7 @@ export class PlacesController {
   @Get(':placeId')
   @UseGuards(PlaceMemberGuard)
   @ApiOperation({ summary: 'One place with its members and counts' })
+  @ApiOkResponse({ type: PlaceDetailResponse })
   findOne(@CurrentUser('id') userId: string, @Param('placeId', ParseUUIDPipe) placeId: string) {
     return this.placesService.findOne(userId, placeId);
   }
@@ -53,6 +64,7 @@ export class PlacesController {
   @UseGuards(PlaceMemberGuard)
   @PlaceRoles(MemberRole.ADMIN)
   @ApiOperation({ summary: 'Update place details' })
+  @ApiOkResponse({ type: PlaceResponse })
   update(
     @CurrentUser('id') userId: string,
     @Param('placeId', ParseUUIDPipe) placeId: string,
@@ -65,6 +77,7 @@ export class PlacesController {
   @UseGuards(PlaceMemberGuard)
   @PlaceRoles(MemberRole.OWNER)
   @ApiOperation({ summary: 'Soft-delete a place and everything inside it' })
+  @ApiOkResponse({ type: SuccessResponse })
   remove(@CurrentUser('id') userId: string, @Param('placeId', ParseUUIDPipe) placeId: string) {
     return this.placesService.remove(userId, placeId);
   }
@@ -72,6 +85,7 @@ export class PlacesController {
   @Get(':placeId/activity')
   @UseGuards(PlaceMemberGuard)
   @ApiOperation({ summary: 'Who did what in this place' })
+  @ApiOkResponse({ type: [ActivityLogResponse] })
   activity(@Param('placeId', ParseUUIDPipe) placeId: string, @Query() pagination: PaginationDto) {
     return this.activityService.listForPlace(placeId, pagination);
   }

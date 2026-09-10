@@ -32,6 +32,10 @@ npm run start:dev
 - Interactive docs (Swagger): <http://localhost:3000/api/docs>
 - Health: <http://localhost:3000/api/health>
 
+**Building the client?** Read [FRONTEND.md](FRONTEND.md) — the full integration guide, with real
+request/response examples. The machine-readable contract lives in
+[`openapi/openapi.json`](openapi/openapi.json), committed and regenerated with `npm run openapi`.
+
 Seeded logins — `owner@findmystuff.test` and `family@findmystuff.test`, password
 `Password123`.
 
@@ -145,6 +149,7 @@ keys, `updatedAt`, and soft deletes, so a client can generate ids offline and re
 | `npm run prisma:migrate` | Create and apply a migration |
 | `npm run prisma:studio` | Browse the database |
 | `npm run prisma:seed` | Load demo data |
+| `npm run openapi` | Regenerate `openapi/openapi.{json,yaml}` (no database needed) |
 
 ## Environment
 

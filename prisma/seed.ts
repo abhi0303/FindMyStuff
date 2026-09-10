@@ -167,6 +167,12 @@ async function main() {
   const soon = new Date();
   soon.setDate(soon.getDate() + 12);
 
+  const lentLastMonth = new Date();
+  lentLastMonth.setDate(lentLastMonth.getDate() - 30);
+
+  const overdue = new Date();
+  overdue.setDate(overdue.getDate() - 9);
+
   await prisma.item.createMany({
     data: [
       {
@@ -224,12 +230,57 @@ async function main() {
         tags: ['tools'],
         status: ItemStatus.LENT_OUT,
         lentToName: 'Neighbour',
-        lentAt: new Date(),
+        lentAt: lentLastMonth,
+        purchasedAt: lentLastMonth,
+        warrantyUntil: soon,
+        // Already past due, so the "overdue" bucket of /items/attention is
+        // populated for whoever builds that screen.
+        dueAt: overdue,
         ownerId: owner.id,
         createdById: owner.id,
       },
     ],
   });
+
+  // Items created with createMany have no movement rows, so add the initial
+  // "Added" entry plus one real move — otherwise the history screen is empty.
+  const seededItems = await prisma.item.findMany({
+    where: { placeId: place.id },
+    select: { id: true, name: true, storageId: true, createdById: true },
+  });
+
+  const labelFor = (storageId: string | null) =>
+    ({
+      [almirah.id]: 'Bedroom › Almirah',
+      [topShelf.id]: 'Bedroom › Almirah › Top shelf',
+      [blueBox.id]: 'Bedroom › Under the bed › Blue box',
+    })[storageId ?? ''] ?? null;
+
+  await prisma.itemMovement.createMany({
+    data: seededItems.map((item) => ({
+      itemId: item.id,
+      fromStorageId: null,
+      toStorageId: item.storageId,
+      toLabel: labelFor(item.storageId),
+      movedById: item.createdById,
+      note: 'Added',
+    })),
+  });
+
+  const quilt = seededItems.find((item) => item.name === 'Winter quilt');
+  if (quilt) {
+    await prisma.itemMovement.create({
+      data: {
+        itemId: quilt.id,
+        fromStorageId: blueBox.id,
+        toStorageId: almirah.id,
+        fromLabel: 'Bedroom › Under the bed › Blue box',
+        toLabel: 'Bedroom › Almirah',
+        movedById: family.id,
+        note: 'Moved up when the weather turned',
+      },
+    });
+  }
 
   console.log('Seed complete.');
   console.log('  owner@findmystuff.test  / Password123  (OWNER)');

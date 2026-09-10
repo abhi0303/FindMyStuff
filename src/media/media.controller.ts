@@ -14,6 +14,9 @@ import { Response } from 'express';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { MediaService } from './media.service';
+import { ApiCreatedResponse, ApiOkResponse, ApiProduces } from '@nestjs/swagger';
+import { MediaResponse } from './dto/media-response.dto';
+import { SuccessResponse } from '../common/dto/response.dto';
 
 @ApiTags('media')
 @ApiBearerAuth()
@@ -23,6 +26,7 @@ export class MediaController {
 
   @Post()
   @ApiOperation({ summary: 'Upload a base64 image and get a media id back' })
+  @ApiCreatedResponse({ type: MediaResponse })
   async upload(@CurrentUser('id') userId: string, @Body() dto: CreateMediaDto) {
     // Internal storage keys never leave the server; clients address media by id.
     const {
@@ -35,6 +39,7 @@ export class MediaController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Media metadata' })
+  @ApiOkResponse({ type: MediaResponse })
   metadata(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string) {
     return this.mediaService.metadata(userId, id);
   }
@@ -42,6 +47,8 @@ export class MediaController {
   @Get(':id/raw')
   @Header('Cache-Control', 'private, max-age=86400')
   @ApiOperation({ summary: 'Original image bytes' })
+  @ApiProduces('image/jpeg', 'image/png', 'image/webp')
+  @ApiOkResponse({ schema: { type: 'string', format: 'binary' } })
   async raw(
     @CurrentUser('id') userId: string,
     @Param('id', ParseUUIDPipe) id: string,
@@ -54,6 +61,8 @@ export class MediaController {
   @Get(':id/thumbnail')
   @Header('Cache-Control', 'private, max-age=86400')
   @ApiOperation({ summary: 'Thumbnail bytes — use this in lists' })
+  @ApiProduces('image/webp')
+  @ApiOkResponse({ schema: { type: 'string', format: 'binary' } })
   async thumbnail(
     @CurrentUser('id') userId: string,
     @Param('id', ParseUUIDPipe) id: string,
@@ -65,6 +74,7 @@ export class MediaController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Soft-delete your own media' })
+  @ApiOkResponse({ type: SuccessResponse })
   remove(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string) {
     return this.mediaService.remove(userId, id);
   }
