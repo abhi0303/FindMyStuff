@@ -1,0 +1,521 @@
+// FindMyStuff — data model
+//
+// Hierarchy:  Place (home/office/locker) → Storage tree (room → almirah → shelf → box) → Item
+// Access:     every read/write is scoped through PlaceMember. Nothing is global.
+// Privacy:    Visibility.PRIVATE hides a row from everyone except its owner, even inside a shared place.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum PlaceType {
+  HOME
+  OFFICE
+  LOCKER
+  VEHICLE
+  STORAGE_UNIT
+  OTHER
+}
+
+enum StorageType {
+  ROOM
+  ALMIRAH
+  WARDROBE
+  CABINET
+  SHELF
+  DRAWER
+  BED
+  BOX
+  SUITCASE
+  BAG
+  FRIDGE
+  LOFT
+  RACK
+  DESK
+  SAFE
+  OTHER
+}
+
+enum MemberRole {
+  OWNER // creator; can delete the place and manage everyone
+  ADMIN // can manage storages and invite members
+  MEMBER // can add / move / edit items
+  VIEWER // read-only: can search and see, cannot change anything
+}
+
+enum MemberStatus {
+  INVITED
+  ACTIVE
+  REMOVED
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  BLOCKED
+}
+
+enum Visibility {
+  SHARED // visible to every active member of the place
+  PRIVATE // visible only to the row's owner
+}
+
+enum ItemStatus {
+  AVAILABLE
+  LENT_OUT
+  CONSUMED
+  LOST
+  DISCARDED
+}
+
+enum LengthUnit {
+  CM
+  INCH
+}
+
+enum ActivityAction {
+  PLACE_CREATED
+  PLACE_UPDATED
+  MEMBER_INVITED
+  MEMBER_JOINED
+  MEMBER_ROLE_CHANGED
+  MEMBER_REMOVED
+  STORAGE_CREATED
+  STORAGE_UPDATED
+  STORAGE_DELETED
+  ITEM_CREATED
+  ITEM_UPDATED
+  ITEM_MOVED
+  ITEM_DELETED
+  ITEM_LENT
+  ITEM_RETURNED
+}
+
+// ---------------------------------------------------------------------------
+// Identity
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String  @id @default(uuid()) @db.Uuid
+  email        String  @unique
+  phone        String? @unique
+  name         String
+  passwordHash String
+
+  avatarMediaId String? @db.Uuid
+  avatarMedia   Media?  @relation("UserAvatar", fields: [avatarMediaId], references: [id], onDelete: SetNull)
+
+  // Terms & conditions are versioned, not a boolean: bump TERMS_VERSION in env
+  // and every user is re-prompted on their next authenticated request.
+  termsVersion    String?
+  termsAcceptedAt DateTime?
+  termsAcceptedIp String?
+
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  refreshTokens      RefreshToken[]
+  ownedPlaces        Place[]        @relation("PlaceOwner")
+  memberships        PlaceMember[]  @relation("Membership")
+  invitesSent        PlaceMember[]  @relation("MembershipInviter")
+  placeInvitesSent   PlaceInvite[]  @relation("InviteCreator")
+  placeInvitesUsed   PlaceInvite[]  @relation("InviteAcceptor")
+  friendRequestsSent Friendship[]   @relation("FriendRequester")
+  friendRequestsGot  Friendship[]   @relation("FriendAddressee")
+  storagesCreated    Storage[]      @relation("StorageCreator")
+  itemsOwned         Item[]         @relation("ItemOwner")
+  itemsCreated       Item[]         @relation("ItemCreator")
+  movementsMade      ItemMovement[] @relation("MovementActor")
+  mediaUploaded      Media[]        @relation("MediaOwner")
+  activities         ActivityLog[]  @relation("ActivityActor")
+
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model RefreshToken {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Only the hash is stored — a database leak cannot be replayed as a session.
+  tokenHash String @unique
+
+  // Rotation chain: using a token revokes it and points here at its successor.
+  // A second use of an already-rotated token means theft → revoke the whole chain.
+  replacedByTokenId String?   @db.Uuid
+  revokedAt         DateTime?
+  expiresAt         DateTime
+
+  userAgent String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model Friendship {
+  id String @id @default(uuid()) @db.Uuid
+
+  requesterId String @db.Uuid
+  requester   User   @relation("FriendRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+
+  addresseeId String @db.Uuid
+  addressee   User   @relation("FriendAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  status      FriendshipStatus @default(PENDING)
+  message     String?
+  respondedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId, status])
+  @@index([requesterId, status])
+  @@map("friendships")
+}
+
+// ---------------------------------------------------------------------------
+// Places & access
+// ---------------------------------------------------------------------------
+
+model Place {
+  id      String @id @default(uuid()) @db.Uuid
+  ownerId String @db.Uuid
+  owner   User   @relation("PlaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  name        String
+  type        PlaceType @default(HOME)
+  description String?
+
+  // Dimensions are optional everywhere — most people will not measure their room.
+  widthValue  Decimal?    @db.Decimal(10, 2)
+  lengthValue Decimal?    @db.Decimal(10, 2)
+  heightValue Decimal?    @db.Decimal(10, 2)
+  lengthUnit  LengthUnit?
+
+  addressLine String?
+  city        String?
+  country     String?
+  latitude    Float?
+  longitude   Float?
+
+  coverMediaId String? @db.Uuid
+  coverMedia   Media?  @relation("PlaceCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  members    PlaceMember[]
+  invites    PlaceInvite[]
+  storages   Storage[]
+  items      Item[]
+  activities ActivityLog[]
+
+  @@index([ownerId, deletedAt])
+  @@map("places")
+}
+
+model PlaceMember {
+  id String @id @default(uuid()) @db.Uuid
+
+  placeId String @db.Uuid
+  place   Place  @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  userId String @db.Uuid
+  user   User   @relation("Membership", fields: [userId], references: [id], onDelete: Cascade)
+
+  role   MemberRole   @default(MEMBER)
+  status MemberStatus @default(INVITED)
+
+  invitedById String? @db.Uuid
+  invitedBy   User?   @relation("MembershipInviter", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  invitedAt DateTime  @default(now())
+  joinedAt  DateTime?
+  removedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([placeId, userId])
+  @@index([userId, status])
+  @@index([placeId, status])
+  @@map("place_members")
+}
+
+// Invite by code/link, so you can add someone who has not signed up yet.
+model PlaceInvite {
+  id String @id @default(uuid()) @db.Uuid
+
+  placeId String @db.Uuid
+  place   Place  @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  code  String     @unique
+  email String?
+  phone String?
+  role  MemberRole @default(MEMBER)
+
+  createdById String @db.Uuid
+  createdBy   User   @relation("InviteCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  acceptedById String?   @db.Uuid
+  acceptedBy   User?     @relation("InviteAcceptor", fields: [acceptedById], references: [id], onDelete: SetNull)
+  revokedAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([placeId, acceptedAt])
+  @@index([email])
+  @@map("place_invites")
+}
+
+// ---------------------------------------------------------------------------
+// Storage tree
+// ---------------------------------------------------------------------------
+
+model Storage {
+  id String @id @default(uuid()) @db.Uuid
+
+  placeId String @db.Uuid
+  place   Place  @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  // Self-reference gives unlimited nesting: room → almirah → shelf → box → pouch.
+  parentId String?   @db.Uuid
+  parent   Storage?  @relation("StorageTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children Storage[] @relation("StorageTree")
+
+  name        String
+  type        StorageType @default(OTHER)
+  description String?
+
+  // Materialised path of ancestor ids, root first, e.g. "<roomId>/<almirahId>".
+  // Empty for a root node. Names are resolved at read time so a rename cannot
+  // leave a stale breadcrumb anywhere.
+  path  String @default("")
+  level Int    @default(0)
+
+  // Short human-typeable code printed on a QR sticker for the box/carton.
+  labelCode String @unique
+
+  widthValue  Decimal?    @db.Decimal(10, 2)
+  lengthValue Decimal?    @db.Decimal(10, 2)
+  heightValue Decimal?    @db.Decimal(10, 2)
+  lengthUnit  LengthUnit?
+
+  latitude  Float?
+  longitude Float?
+
+  coverMediaId String? @db.Uuid
+  coverMedia   Media?  @relation("StorageCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
+
+  createdById String @db.Uuid
+  createdBy   User   @relation("StorageCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  items         Item[]
+  movementsFrom ItemMovement[] @relation("MovementFrom")
+  movementsTo   ItemMovement[] @relation("MovementTo")
+
+  @@index([placeId, deletedAt])
+  @@index([parentId])
+  @@index([placeId, path])
+  @@map("storages")
+}
+
+// ---------------------------------------------------------------------------
+// Items
+// ---------------------------------------------------------------------------
+
+model Item {
+  id String @id @default(uuid()) @db.Uuid
+
+  placeId String @db.Uuid
+  place   Place  @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  // Nullable so an item can exist while "not put away anywhere yet".
+  storageId String?  @db.Uuid
+  storage   Storage? @relation(fields: [storageId], references: [id], onDelete: SetNull)
+
+  name        String
+  description String?
+
+  // "charger" should find the thing you saved as "Type-C cable".
+  aliases  String[] @default([])
+  tags     String[] @default([])
+  category String?
+
+  quantity     Int     @default(1)
+  lowStockAt   Int?
+  serialNumber String?
+
+  status     ItemStatus @default(AVAILABLE)
+  visibility Visibility @default(SHARED)
+
+  // Owner of a PRIVATE item — the only member who can see it.
+  ownerId String @db.Uuid
+  owner   User   @relation("ItemOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Where the thing physically is, when that differs from the place itself.
+  latitude  Float?
+  longitude Float?
+
+  // Medicines, warranties, passports, food.
+  purchasedAt   DateTime?
+  expiresAt     DateTime?
+  warrantyUntil DateTime?
+  remindAt      DateTime?
+  remindedAt    DateTime?
+
+  // Lending
+  lentToName String?
+  lentToId   String?   @db.Uuid
+  lentAt     DateTime?
+  dueAt      DateTime?
+
+  createdById String @db.Uuid
+  createdBy   User   @relation("ItemCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  media     ItemMedia[]
+  movements ItemMovement[]
+
+  @@index([placeId, deletedAt])
+  @@index([storageId])
+  @@index([placeId, status])
+  @@index([expiresAt])
+  @@index([remindAt])
+  @@index([ownerId])
+  @@map("items")
+}
+
+// Every move is recorded: powers the activity feed and the
+// "not there? here is where it was before" fallback.
+model ItemMovement {
+  id String @id @default(uuid()) @db.Uuid
+
+  itemId String @db.Uuid
+  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  fromStorageId String?  @db.Uuid
+  fromStorage   Storage? @relation("MovementFrom", fields: [fromStorageId], references: [id], onDelete: SetNull)
+
+  toStorageId String?  @db.Uuid
+  toStorage   Storage? @relation("MovementTo", fields: [toStorageId], references: [id], onDelete: SetNull)
+
+  // Snapshot of the human-readable breadcrumbs at the time of the move, so
+  // history stays readable even after a storage is renamed or deleted.
+  fromLabel String?
+  toLabel   String?
+
+  movedById String @db.Uuid
+  movedBy   User   @relation("MovementActor", fields: [movedById], references: [id], onDelete: Cascade)
+
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([itemId, createdAt])
+  @@map("item_movements")
+}
+
+// ---------------------------------------------------------------------------
+// Media
+// ---------------------------------------------------------------------------
+
+// Images arrive as base64 from the apps but are decoded and written to the
+// media driver (local disk now, S3 later). Rows stay small so list queries
+// never drag megabytes of image data along with them.
+model Media {
+  id String @id @default(uuid()) @db.Uuid
+
+  ownerId String @db.Uuid
+  owner   User   @relation("MediaOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  driver       String  @default("local")
+  storageKey   String
+  thumbnailKey String?
+
+  mimeType  String
+  sizeBytes Int
+  width     Int?
+  height    Int?
+  checksum  String
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  itemLinks     ItemMedia[]
+  userAvatars   User[]      @relation("UserAvatar")
+  placeCovers   Place[]     @relation("PlaceCover")
+  storageCovers Storage[]   @relation("StorageCover")
+
+  @@index([ownerId, deletedAt])
+  @@index([checksum])
+  @@map("media")
+}
+
+model ItemMedia {
+  itemId String @db.Uuid
+  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  mediaId String @db.Uuid
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@id([itemId, mediaId])
+  @@index([mediaId])
+  @@map("item_media")
+}
+
+// ---------------------------------------------------------------------------
+// Activity
+// ---------------------------------------------------------------------------
+
+model ActivityLog {
+  id String @id @default(uuid()) @db.Uuid
+
+  placeId String @db.Uuid
+  place   Place  @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  actorId String @db.Uuid
+  actor   User   @relation("ActivityActor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  action     ActivityAction
+  entityType String
+  entityId   String?        @db.Uuid
+  summary    String
+  meta       Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([placeId, createdAt])
+  @@map("activity_logs")
+}
