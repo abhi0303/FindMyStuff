@@ -14,7 +14,8 @@ datasource db {
   url       = env("DATABASE_URL")
   // Unpooled connection — migrations need a direct session, because PgBouncer
   // in transaction mode cannot hold the advisory lock a migration takes.
-  // Falls back to DATABASE_URL locally, where there is no pooler.
+  // REQUIRED: Prisma does not fall back to DATABASE_URL, it fails with P1012.
+  // Where there is no pooler (local Docker), set it to the same value.
   directUrl = env("DIRECT_URL")
 }
 

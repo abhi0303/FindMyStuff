@@ -35,6 +35,8 @@ services:
       # the value instead of storing it in this file — never commit these.
       #   DATABASE_URL -> the POOLED host (contains "-pooler")
       #   DIRECT_URL   -> the same host WITHOUT "-pooler", used by migrations
+      # BOTH are required. Leaving either unset fails the deploy at startup
+      # with "P1012: Environment variable not found".
       - key: DATABASE_URL
         sync: false
       - key: DIRECT_URL
