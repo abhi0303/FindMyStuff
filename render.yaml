@@ -3,16 +3,17 @@
 # Creates the API service and its Postgres database together. In the Render
 # dashboard: New → Blueprint → pick this repo.
 #
-# Region: change `singapore` if you want the service nearer your users.
-# The web service and the database MUST share a region to talk over the
-# internal network.
+# Region: `ohio` matches Neon's us-east-2, so the app sits next to its
+# database. Put the app near the DATABASE, not near you — one page load makes
+# several queries, and each one pays the round trip. Your own latency to the
+# app is paid once.
 
 services:
   - type: web
     name: findmystuff-api
     runtime: node
     plan: free
-    region: singapore
+    region: ohio
     branch: main
 
     # --include=dev is required: NODE_ENV=production makes npm skip
@@ -30,11 +31,14 @@ services:
       - key: NODE_ENV
         value: production
 
-      # Wired automatically from the database below.
+      # Neon connection strings. `sync: false` means Render prompts you for
+      # the value instead of storing it in this file — never commit these.
+      #   DATABASE_URL -> the POOLED host (contains "-pooler")
+      #   DIRECT_URL   -> the same host WITHOUT "-pooler", used by migrations
       - key: DATABASE_URL
-        fromDatabase:
-          name: findmystuff-db
-          property: connectionString
+        sync: false
+      - key: DIRECT_URL
+        sync: false
 
       # Render generates these once and keeps them stable across deploys.
       # Rotating them logs every user out.
@@ -79,10 +83,3 @@ services:
         value: '300'
       - key: AUTH_THROTTLE_LIMIT
         value: '10'
-
-databases:
-  - name: findmystuff-db
-    plan: free
-    region: singapore
-    databaseName: findmystuff
-    user: findmystuff

@@ -9,8 +9,13 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  // Pooled connection (PgBouncer) — what the running app uses.
+  url       = env("DATABASE_URL")
+  // Unpooled connection — migrations need a direct session, because PgBouncer
+  // in transaction mode cannot hold the advisory lock a migration takes.
+  // Falls back to DATABASE_URL locally, where there is no pooler.
+  directUrl = env("DIRECT_URL")
 }
 
 // ---------------------------------------------------------------------------
