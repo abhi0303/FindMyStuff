@@ -157,6 +157,23 @@ See `.env.example`. `DATABASE_URL`, `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET`
 required — the app refuses to boot on a secret shorter than 32 characters rather than
 run insecurely.
 
+## Deploying to Render
+
+A [`render.yaml`](render.yaml) blueprint creates the API and its Postgres database together.
+In the Render dashboard: **New → Blueprint → pick this repo**. Set `CORS_ORIGINS` when prompted
+(the frontend URL); everything else is wired automatically.
+
+Three things about the free plan that will surprise you:
+
+1. **The filesystem is ephemeral.** Uploaded photos are written to disk by the `local` media
+   driver and are **wiped on every deploy and restart**. Fine for a demo, not for real use —
+   move to object storage (or a paid persistent disk) before anyone relies on it.
+2. **Free Postgres is deleted after 30 days.** Back up or upgrade before then.
+3. **Free services sleep after 15 minutes idle**, so the next request takes ~50s. Mobile clients
+   need a generous timeout on the first call.
+
+The blueprint deploys the `main` branch — change `branch:` in `render.yaml` to deploy another.
+
 ## Not built yet
 
 Push notifications for reminders, S3 media driver, ownership transfer, item-level
