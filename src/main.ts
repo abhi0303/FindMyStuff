@@ -36,6 +36,15 @@ async function bootstrap() {
   const isProduction = config.get<string>('env') === 'production';
   const swaggerEnabled = config.getOrThrow<boolean>('swaggerEnabled');
 
+  // Render sits in front of this app as a single reverse-proxy hop. Without
+  // this, Express reads every request's IP as that one upstream hop — so
+  // ThrottlerGuard buckets ALL traffic (every real client, plus the
+  // platform's own health-check probe) together as if it were one caller,
+  // instead of correctly limiting each real client individually. Trusting
+  // exactly 1 hop (not `true`, which would trust an unbounded chain and let a
+  // client spoof its own IP via X-Forwarded-For) matches Render's topology.
+  app.set('trust proxy', 1);
+
   app.setGlobalPrefix(prefix);
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
   app.use(compression());

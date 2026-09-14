@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Public } from './common/decorators/public.decorator';
 import { PrismaService } from './prisma/prisma.service';
 
@@ -23,6 +24,19 @@ export class AppController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Public()
+  // @Public() only bypasses JWT auth — it does nothing for ThrottlerGuard,
+  // which is a separate global guard. Without this, the platform's own
+  // health-check probe shares a rate-limit bucket with real traffic, and once
+  // that bucket fills, the health check itself starts getting 429'd — which
+  // the platform reads as "unhealthy" and restarts the instance over.
+  //
+  // Bare @SkipThrottle() only skips the bucket named 'default' — it does NOT
+  // skip every configured throttler. This app registers two named throttlers
+  // ('default' and the much tighter 'auth', 10 req/5min), and both apply to
+  // every route unless skipped by name. Naming both here is required, not
+  // redundant — the 'auth' bucket alone is tight enough to 429 a health
+  // check within seconds of restart-loop-induced retries.
+  @SkipThrottle({ default: true, auth: true })
   @Get('health')
   @ApiOperation({ summary: 'Liveness and database check' })
   @ApiOkResponse({ type: HealthResponse })
