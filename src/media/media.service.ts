@@ -1,10 +1,13 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+// Type-only: erased at compile time, so this costs nothing at runtime and
+// does not pull in sharp's native addon — the dynamic import below does that,
+// deliberately deferred to first use.
+import type { Metadata } from 'sharp';
 import { ConfigService } from '@nestjs/config';
 import { MemberStatus, Media, Visibility } from '@prisma/client';
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
-import sharp, { type Metadata } from 'sharp';
 import { PrismaService } from '../prisma/prisma.service';
 
 const ALLOWED_FORMATS: Record<string, string> = {
@@ -27,6 +30,17 @@ export class MediaService {
 
   private get root(): string {
     return path.resolve(this.config.getOrThrow<string>('media.localPath'));
+  }
+
+  /**
+   * sharp bundles a native libvips addon that costs real memory the moment
+   * it is loaded. Importing it dynamically, on first use, keeps that cost off
+   * every instance that never handles an image upload during its lifetime —
+   * meaningful on a memory-constrained free-tier container.
+   */
+  private async sharp() {
+    const { default: sharp } = await import('sharp');
+    return sharp;
   }
 
   private decodeBase64(input: string): Buffer {
@@ -64,6 +78,8 @@ export class MediaService {
     if (buffer.length === 0) {
       throw new BadRequestException('Image is empty');
     }
+
+    const sharp = await this.sharp();
 
     let metadata: Metadata;
     try {
