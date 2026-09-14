@@ -7,6 +7,24 @@ import compression from 'compression';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 
+/**
+ * Node's default behaviour for an unhandled promise rejection (since v15) is
+ * to crash the process with no application-level log line — Render then
+ * restarts the container and the actual cause is never seen anywhere. These
+ * log the real error before Node's own handling proceeds, so a future crash
+ * is diagnosable from `render logs` instead of showing up only as a gap.
+ */
+process.on('unhandledRejection', (reason) => {
+  console.error('[fatal] Unhandled promise rejection:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('[fatal] Uncaught exception:', error);
+  // The process is now in an undefined state — exit rather than limp on,
+  // but only after the error above is actually on the page.
+  process.exit(1);
+});
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const config = app.get(ConfigService);
