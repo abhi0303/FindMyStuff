@@ -27,6 +27,12 @@ import { UsersModule } from './users/users.module';
       load: [configuration],
       validate: validateEnv,
     }),
+    // IMPORTANT: every registered throttler below applies to EVERY route in
+    // the app by default — @nestjs/throttler does not scope a named throttler
+    // to where it's used with @Throttle(). Any new controller MUST add
+    // @SkipThrottle({ auth: true }) at the class level, or it silently
+    // inherits the 10-req/5min 'auth' bucket meant only for signup/login.
+    // (Found the hard way: every existing controller was missing this.)
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

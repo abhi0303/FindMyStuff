@@ -81,8 +81,17 @@ services:
 
       - key: THROTTLE_TTL_SECONDS
         value: '60'
+      # 120 (a common generic default) was too tight for how this app's pages
+      # actually load: one screen can fan out to 6-8 GET calls (place, tree,
+      # items in a couple of filter variants, attention, storage detail), and
+      # React's StrictMode doubles every one of those in development. Once
+      # `trust proxy` correctly identifies each real client instead of
+      # pooling everyone behind Render's edge into one bucket, a single
+      # user's own normal navigation was enough to trip this. 300/min still
+      # meaningfully rate-limits scripted abuse; it does not touch the much
+      # tighter, separate 'auth' bucket below, which still guards signup/login.
       - key: THROTTLE_LIMIT
-        value: '120'
+        value: '300'
       - key: AUTH_THROTTLE_TTL_SECONDS
         value: '300'
       - key: AUTH_THROTTLE_LIMIT
