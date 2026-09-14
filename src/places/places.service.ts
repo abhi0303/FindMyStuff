@@ -22,6 +22,8 @@ export class PlacesService {
     const place = await this.prisma.$transaction(async (tx) => {
       const created = await tx.place.create({
         data: {
+          // dto.id (optional, client-generated for offline creates) flows
+          // through via ...data — do not destructure it out separately.
           ...data,
           coverMediaId,
           ownerId: userId,

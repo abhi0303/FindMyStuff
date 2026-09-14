@@ -80,6 +80,8 @@ export class StoragesService {
 
     const coverMediaId = await this.media.createOptional(userId, coverImageBase64);
 
+    // dto.id (optional, client-generated for offline creates) flows through
+    // via ...data — do not destructure it out separately.
     const storage = await this.createWithUniqueLabel({
       ...data,
       placeId,

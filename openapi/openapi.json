@@ -26,7 +26,18 @@
     "/api/media": {
       "post": {
         "operationId": "MediaController_upload",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -105,6 +116,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "responses": {
@@ -219,7 +240,18 @@
     "/api/auth/signup": {
       "post": {
         "operationId": "AuthController_signup",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -251,7 +283,18 @@
     "/api/auth/login": {
       "post": {
         "operationId": "AuthController_login",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -283,7 +326,18 @@
     "/api/auth/refresh": {
       "post": {
         "operationId": "AuthController_refresh",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -315,7 +369,18 @@
     "/api/auth/logout": {
       "post": {
         "operationId": "AuthController_logout",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -347,7 +412,18 @@
     "/api/auth/logout-all": {
       "post": {
         "operationId": "AuthController_logoutAll",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -401,7 +477,18 @@
     "/api/auth/accept-terms": {
       "post": {
         "operationId": "AuthController_acceptTerms",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -438,7 +525,18 @@
     "/api/auth/change-password": {
       "post": {
         "operationId": "AuthController_changePassword",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -475,7 +573,18 @@
     "/api/users/me": {
       "patch": {
         "operationId": "UsersController_updateProfile",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -510,7 +619,18 @@
       },
       "delete": {
         "operationId": "UsersController_deactivate",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -603,7 +723,18 @@
     "/api/friends/requests": {
       "post": {
         "operationId": "FriendshipsController_send",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -708,6 +839,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "responses": {
@@ -744,6 +885,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "responses": {
@@ -780,6 +931,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "responses": {
@@ -816,6 +977,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "responses": {
@@ -844,7 +1015,18 @@
     "/api/places": {
       "post": {
         "operationId": "PlacesController_create",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -951,6 +1133,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "requestBody": {
@@ -995,6 +1187,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "responses": {
@@ -1083,7 +1285,18 @@
     "/api/invites/accept": {
       "post": {
         "operationId": "MembersController_acceptInvite",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1165,6 +1378,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "requestBody": {
@@ -1219,6 +1442,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "requestBody": {
@@ -1271,6 +1504,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "responses": {
@@ -1307,6 +1550,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "responses": {
@@ -1343,6 +1596,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "requestBody": {
@@ -1434,6 +1697,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "responses": {
@@ -1506,6 +1779,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "requestBody": {
@@ -1732,6 +2015,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "requestBody": {
@@ -1784,6 +2077,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "responses": {
@@ -1856,6 +2159,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "requestBody": {
@@ -2123,6 +2436,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "requestBody": {
@@ -2175,6 +2498,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "responses": {
@@ -2266,6 +2599,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "requestBody": {
@@ -2320,6 +2663,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "requestBody": {
@@ -2374,6 +2727,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Optional. Safely retry this exact request after a dropped connection or timeout — a repeat with the same key and the same body returns the original response instead of running again. A repeat with the same key but a different body is rejected (422). See FRONTEND.md for the full pattern."
           }
         ],
         "responses": {
@@ -2487,6 +2850,54 @@
           "search"
         ]
       }
+    },
+    "/api/sync": {
+      "get": {
+        "description": "Omit `since` for a first, full sync. On every later call, pass back the `serverTime` the PREVIOUS response returned — never the device clock, which can drift. Covers every place you are an active member of unless `placeId` narrows it to one. Respects the same PRIVATE-item visibility rule as every other endpoint: an item marked PRIVATE by someone else never appears here, whether it changed or was deleted.",
+        "operationId": "SyncController_sync",
+        "parameters": [
+          {
+            "name": "since",
+            "required": false,
+            "in": "query",
+            "description": "Only return changes after this server timestamp. Always use the `serverTime` value from the PREVIOUS sync response here — never the device's own clock, which can drift. Omit entirely for the first, full sync.",
+            "schema": {
+              "example": "2026-09-14T12:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "placeId",
+            "required": false,
+            "in": "query",
+            "description": "Narrow the sync to one place. Omit for every place you can see.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Everything that changed since a given time — for offline backup",
+        "tags": [
+          "sync"
+        ]
+      }
     }
   },
   "info": {
@@ -2527,6 +2938,10 @@
     {
       "name": "search",
       "description": "Find where you kept something"
+    },
+    {
+      "name": "sync",
+      "description": "Delta sync for offline backup — see FRONTEND.md"
     },
     {
       "name": "media",
@@ -3108,6 +3523,11 @@
       "CreatePlaceDto": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Client-generated UUID. Optional — omit to let the server assign one. Set this when creating offline so the real, final id is known immediately and nested offline creates (e.g. an item inside a storage that doesn't exist on the server yet) can reference it without a swap-after-sync step. Pair with an Idempotency-Key header so a retried request cannot create a second row.",
+            "format": "uuid"
+          },
           "name": {
             "type": "string",
             "example": "Home — Sector 62"
@@ -3510,6 +3930,11 @@
       "UpdatePlaceDto": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Client-generated UUID. Optional — omit to let the server assign one. Set this when creating offline so the real, final id is known immediately and nested offline creates (e.g. an item inside a storage that doesn't exist on the server yet) can reference it without a swap-after-sync step. Pair with an Idempotency-Key header so a retried request cannot create a second row.",
+            "format": "uuid"
+          },
           "name": {
             "type": "string",
             "example": "Home — Sector 62"
@@ -3933,6 +4358,11 @@
       "CreateStorageDto": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Client-generated UUID. Optional — omit to let the server assign one. Set this when creating offline so the real, final id is known immediately and nested offline creates (e.g. an item inside a storage that doesn't exist on the server yet) can reference it without a swap-after-sync step. Pair with an Idempotency-Key header so a retried request cannot create a second row.",
+            "format": "uuid"
+          },
           "name": {
             "type": "string",
             "example": "Almirah"
@@ -4195,6 +4625,11 @@
       "UpdateStorageDto": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Client-generated UUID. Optional — omit to let the server assign one. Set this when creating offline so the real, final id is known immediately and nested offline creates (e.g. an item inside a storage that doesn't exist on the server yet) can reference it without a swap-after-sync step. Pair with an Idempotency-Key header so a retried request cannot create a second row.",
+            "format": "uuid"
+          },
           "name": {
             "type": "string",
             "example": "Almirah"
@@ -4364,6 +4799,11 @@
       "CreateItemDto": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Client-generated UUID. Optional — omit to let the server assign one. Set this when creating offline so the real, final id is known immediately and nested offline creates (e.g. an item inside a storage that doesn't exist on the server yet) can reference it without a swap-after-sync step. Pair with an Idempotency-Key header so a retried request cannot create a second row.",
+            "format": "uuid"
+          },
           "name": {
             "type": "string",
             "example": "Passport"
@@ -4874,6 +5314,11 @@
       "UpdateItemDto": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Client-generated UUID. Optional — omit to let the server assign one. Set this when creating offline so the real, final id is known immediately and nested offline creates (e.g. an item inside a storage that doesn't exist on the server yet) can reference it without a swap-after-sync step. Pair with an Idempotency-Key header so a retried request cannot create a second row.",
+            "format": "uuid"
+          },
           "name": {
             "type": "string",
             "example": "Passport"
@@ -5204,6 +5649,81 @@
           "items",
           "meta",
           "storages"
+        ]
+      },
+      "SyncDeletedIds": {
+        "type": "object",
+        "properties": {
+          "places": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "storages": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": [
+          "places",
+          "storages",
+          "items"
+        ]
+      },
+      "SyncResponse": {
+        "type": "object",
+        "properties": {
+          "serverTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Store this and send it back as `since` on the next call — never the device clock. When `truncated` is true, this is NOT the actual current time: it is the cutoff up to which every array is guaranteed complete, so calling again with it is always safe and always makes progress. Calling again with the same `since` you just sent would not."
+          },
+          "places": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlaceResponse"
+            }
+          },
+          "storages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StorageResponse"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemResponse"
+            }
+          },
+          "deleted": {
+            "$ref": "#/components/schemas/SyncDeletedIds"
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "true if any array below hit the per-call cap and there are more changes not yet delivered. If so, call again right away with the `serverTime` this response returned (see its description) rather than waiting.",
+            "example": false
+          }
+        },
+        "required": [
+          "serverTime",
+          "places",
+          "storages",
+          "items",
+          "deleted",
+          "truncated"
         ]
       }
     }

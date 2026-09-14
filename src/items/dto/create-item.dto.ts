@@ -23,6 +23,19 @@ const trimArray = ({ value }: { value: unknown }) =>
     : value;
 
 export class CreateItemDto {
+  @ApiPropertyOptional({
+    description:
+      'Client-generated UUID. Optional — omit to let the server assign one. ' +
+      'Set this when creating offline so the real, final id is known immediately ' +
+      "and nested offline creates (e.g. an item inside a storage that doesn't " +
+      "exist on the server yet) can reference it without a swap-after-sync step. " +
+      'Pair with an Idempotency-Key header so a retried request cannot create a second row.',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  id?: string;
+
   @ApiProperty({ example: 'Passport' })
   @IsString()
   @MinLength(1)

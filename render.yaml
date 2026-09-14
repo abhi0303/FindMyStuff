@@ -96,3 +96,7 @@ services:
         value: '300'
       - key: AUTH_THROTTLE_LIMIT
         value: '10'
+
+      # How long an Idempotency-Key is remembered for safe retries.
+      - key: IDEMPOTENCY_KEY_TTL_HOURS
+        value: '24'
