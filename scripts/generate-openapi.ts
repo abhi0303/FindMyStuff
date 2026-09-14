@@ -9,6 +9,7 @@
  */
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { addIdempotencyKeyHeader } from '../src/common/openapi/add-idempotency-header';
 import { Test } from '@nestjs/testing';
 import * as yaml from 'js-yaml';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -63,11 +64,13 @@ async function generate() {
     .addTag('storages', 'The nested storage tree')
     .addTag('items', 'The things you keep')
     .addTag('search', 'Find where you kept something')
+    .addTag('sync', 'Delta sync for offline backup — see FRONTEND.md')
     .addTag('media', 'Photo upload and serving')
     .addTag('health', 'Liveness')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
+  addIdempotencyKeyHeader(document);
 
   const outDir = path.resolve(__dirname, '..', 'openapi');
   mkdirSync(outDir, { recursive: true });

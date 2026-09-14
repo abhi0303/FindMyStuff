@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ActivityModule } from './activity/activity.module';
@@ -11,6 +12,7 @@ import { TermsGuard } from './common/guards/terms.guard';
 import configuration from './config/configuration';
 import { validateEnv } from './config/env.validation';
 import { FriendshipsModule } from './friendships/friendships.module';
+import { IdempotencyModule } from './common/idempotency/idempotency.module';
 import { ItemsModule } from './items/items.module';
 import { MediaModule } from './media/media.module';
 import { MembersModule } from './members/members.module';
@@ -18,6 +20,7 @@ import { PlacesModule } from './places/places.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SearchModule } from './search/search.module';
 import { StoragesModule } from './storages/storages.module';
+import { SyncModule } from './sync/sync.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -27,6 +30,7 @@ import { UsersModule } from './users/users.module';
       load: [configuration],
       validate: validateEnv,
     }),
+    ScheduleModule.forRoot(),
     // IMPORTANT: every registered throttler below applies to EVERY route in
     // the app by default — @nestjs/throttler does not scope a named throttler
     // to where it's used with @Throttle(). Any new controller MUST add
@@ -54,6 +58,7 @@ import { UsersModule } from './users/users.module';
     PrismaModule,
     MediaModule,
     ActivityModule,
+    IdempotencyModule,
     AuthModule,
     UsersModule,
     FriendshipsModule,
@@ -62,6 +67,7 @@ import { UsersModule } from './users/users.module';
     StoragesModule,
     ItemsModule,
     SearchModule,
+    SyncModule,
   ],
   controllers: [AppController],
   providers: [

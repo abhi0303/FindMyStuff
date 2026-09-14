@@ -23,6 +23,9 @@ export interface AppConfig {
     authTtlSeconds: number;
     authLimit: number;
   };
+  idempotency: {
+    ttlHours: number;
+  };
 }
 
 const int = (value: string | undefined, fallback: number): number => {
@@ -58,8 +61,13 @@ export default (): AppConfig => ({
   },
   throttle: {
     ttlSeconds: int(process.env.THROTTLE_TTL_SECONDS, 60),
-    limit: int(process.env.THROTTLE_LIMIT, 120),
+    // Kept in sync with THROTTLE_LIMIT's documented default in render.yaml —
+    // see the comment there for why 120 was too tight.
+    limit: int(process.env.THROTTLE_LIMIT, 300),
     authTtlSeconds: int(process.env.AUTH_THROTTLE_TTL_SECONDS, 300),
     authLimit: int(process.env.AUTH_THROTTLE_LIMIT, 10),
+  },
+  idempotency: {
+    ttlHours: int(process.env.IDEMPOTENCY_KEY_TTL_HOURS, 24),
   },
 });

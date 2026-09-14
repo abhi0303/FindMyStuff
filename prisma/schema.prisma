@@ -89,6 +89,11 @@ enum LengthUnit {
   INCH
 }
 
+enum IdempotencyKeyStatus {
+  PENDING
+  COMPLETED
+}
+
 enum ActivityAction {
   PLACE_CREATED
   PLACE_UPDATED
@@ -135,19 +140,20 @@ model User {
   deletedAt DateTime?
 
   refreshTokens      RefreshToken[]
-  ownedPlaces        Place[]        @relation("PlaceOwner")
-  memberships        PlaceMember[]  @relation("Membership")
-  invitesSent        PlaceMember[]  @relation("MembershipInviter")
-  placeInvitesSent   PlaceInvite[]  @relation("InviteCreator")
-  placeInvitesUsed   PlaceInvite[]  @relation("InviteAcceptor")
-  friendRequestsSent Friendship[]   @relation("FriendRequester")
-  friendRequestsGot  Friendship[]   @relation("FriendAddressee")
-  storagesCreated    Storage[]      @relation("StorageCreator")
-  itemsOwned         Item[]         @relation("ItemOwner")
-  itemsCreated       Item[]         @relation("ItemCreator")
-  movementsMade      ItemMovement[] @relation("MovementActor")
-  mediaUploaded      Media[]        @relation("MediaOwner")
-  activities         ActivityLog[]  @relation("ActivityActor")
+  ownedPlaces        Place[]          @relation("PlaceOwner")
+  memberships        PlaceMember[]    @relation("Membership")
+  invitesSent        PlaceMember[]    @relation("MembershipInviter")
+  placeInvitesSent   PlaceInvite[]    @relation("InviteCreator")
+  placeInvitesUsed   PlaceInvite[]    @relation("InviteAcceptor")
+  friendRequestsSent Friendship[]     @relation("FriendRequester")
+  friendRequestsGot  Friendship[]     @relation("FriendAddressee")
+  storagesCreated    Storage[]        @relation("StorageCreator")
+  itemsOwned         Item[]           @relation("ItemOwner")
+  itemsCreated       Item[]           @relation("ItemCreator")
+  movementsMade      ItemMovement[]   @relation("MovementActor")
+  mediaUploaded      Media[]          @relation("MediaOwner")
+  activities         ActivityLog[]    @relation("ActivityActor")
+  idempotencyKeys    IdempotencyKey[]
 
   @@index([deletedAt])
   @@map("users")
@@ -237,6 +243,8 @@ model Place {
   activities ActivityLog[]
 
   @@index([ownerId, deletedAt])
+  // Serves GET /sync's "what changed since <timestamp>" query.
+  @@index([updatedAt])
   @@map("places")
 }
 
@@ -349,6 +357,8 @@ model Storage {
   @@index([placeId, deletedAt])
   @@index([parentId])
   @@index([placeId, path])
+  // Serves GET /sync's "what changed since <timestamp>" query.
+  @@index([placeId, updatedAt])
   @@map("storages")
 }
 
@@ -418,6 +428,8 @@ model Item {
   @@index([expiresAt])
   @@index([remindAt])
   @@index([ownerId])
+  // Serves GET /sync's "what changed since <timestamp>" query.
+  @@index([placeId, updatedAt])
   @@map("items")
 }
 
@@ -504,6 +516,43 @@ model ItemMedia {
 // ---------------------------------------------------------------------------
 // Activity
 // ---------------------------------------------------------------------------
+
+// Lets a client safely retry a create/update/delete after a dropped
+// connection or a timeout without risking a duplicate. The client sends the
+// same Idempotency-Key header on every attempt of the same logical operation;
+// a repeat with that key returns the stored response instead of re-running
+// the handler. See IdempotencyInterceptor for the request lifecycle this
+// backs — a row goes PENDING first (to catch two concurrent retries racing
+// each other), then COMPLETED once the real handler finishes.
+model IdempotencyKey {
+  id String @id @default(uuid()) @db.Uuid
+
+  // Scoped per user: two different users choosing the same key string must
+  // never collide with each other.
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  key    String
+  method String
+  path   String
+
+  // Detects a key reused for a genuinely different request, which is a
+  // client bug, not a legitimate retry — the two must be told apart.
+  requestBodyHash String
+
+  status         IdempotencyKeyStatus @default(PENDING)
+  responseStatus Int?
+  responseBody   Json?
+
+  createdAt DateTime @default(now())
+  // Expired rows are treated as absent on lookup (the key becomes reusable)
+  // and are swept periodically — see IdempotencyCleanupService.
+  expiresAt DateTime
+
+  @@unique([userId, key])
+  @@index([expiresAt])
+  @@map("idempotency_keys")
+}
 
 model ActivityLog {
   id String @id @default(uuid()) @db.Uuid

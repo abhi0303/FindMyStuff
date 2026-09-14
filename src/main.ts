@@ -5,6 +5,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import compression from 'compression';
 import helmet from 'helmet';
+import { addIdempotencyKeyHeader } from './common/openapi/add-idempotency-header';
 import { AppModule } from './app.module';
 
 /**
@@ -81,6 +82,7 @@ async function bootstrap() {
       .build();
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);
+    addIdempotencyKeyHeader(document);
     SwaggerModule.setup(`${prefix}/docs`, app, document, {
       swaggerOptions: { persistAuthorization: true },
     });

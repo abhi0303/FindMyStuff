@@ -691,3 +691,208 @@ real to render:
 So `GET /items/attention` returns all four buckets populated, and item history is never empty.
 
 Run `npm run openapi` after any backend change to refresh `openapi/`.
+
+---
+
+## 16. Offline backup and sync
+
+Three backend features exist specifically for an offline-capable client. All three are
+**opt-in** — nothing changes for requests that don't use them.
+
+| Need | Status |
+|---|---|
+| Back up everything | ✅ `GET /sync` with no `since` |
+| Keep the backup current, including other members' changes | ✅ `GET /sync?since=…` returns only what changed |
+| Create storages and things offline, including nested ones | ✅ Send your own `id` — no temporary-id swapping |
+| Replay queued changes without duplicates | ✅ `Idempotency-Key` header |
+
+### 16.1 Create with your own id
+
+`POST /places`, `POST /places/{placeId}/storages` and `POST /places/{placeId}/items` all
+accept an optional `id`. Generate a UUID v4 on the device (`crypto.randomUUID()`) at the
+moment the user creates the thing, and use it everywhere locally from then on.
+
+```jsonc
+POST /api/places/{placeId}/storages
+{ "id": "31a1754e-e37d-4272-9ad9-d667c19d68c9", "name": "Suitcase", "type": "SUITCASE" }
+
+POST /api/places/{placeId}/items
+{ "id": "8f0c…", "name": "Passport", "storageId": "31a1754e-e37d-4272-9ad9-d667c19d68c9" }
+```
+
+The second request references a storage that only existed on the device a moment ago.
+Because the id was final from the start, **there is no swap-and-relink step** — replay the
+queue in the order it was recorded and every reference is already correct.
+
+- The id must be a valid UUID, or the request fails with `400 id must be a UUID`.
+- Sending an id that already exists returns `409 A record with this id already exists.`
+  For a create you are replaying, **treat that 409 as success** — it means an earlier
+  attempt already landed. Fetch the record if you need the server's copy.
+- Omit `id` entirely and the server assigns one, exactly as before.
+
+### 16.2 The `Idempotency-Key` header
+
+Send it on any `POST`, `PUT`, `PATCH` or `DELETE` you might retry. A repeat with the same key
+and the same body **returns the original response without running again**.
+
+```http
+POST /api/places/{placeId}/items
+Authorization: Bearer <accessToken>
+Idempotency-Key: 5b1d0c7e-2f3a-4c8e-9a61-0d4f7e2b1a93
+Content-Type: application/json
+
+{ "id": "8f0c…", "name": "Passport" }
+```
+
+**Rules for the key**
+
+- One key per queued operation. Generate it when the change is **queued**, store it with the
+  operation, and send the **same** key on every retry of that operation.
+- Never reuse a key for a different operation. Keys are private to each user.
+- Any string up to 200 characters; a UUID is the simplest choice.
+
+**What each response means**
+
+| Response | Meaning | What to do |
+|---|---|---|
+| `2xx` | Done — on the first try, or replayed from a previous try | Mark the operation complete |
+| Same `4xx` as before | The request itself is invalid; replaying returns the same error | Don't retry. Surface it or drop the operation |
+| `409` "already being processed" | Another attempt with this key is still running | Wait a second or two, retry with the **same** key |
+| `422` "already used for a different request" | Same key, different body — a bug in the queue | Fix the queue. Never send a new body under an old key |
+| `5xx` or network error | Nothing was saved, and the key has been released | Retry with the **same** key |
+
+A replay returns the same status code and body as the original. Verified: three identical
+`POST`s with one key returned the same `id` and `201` each time, and created exactly one row.
+
+**Keys last 24 hours.** After that, the same key runs the request again as if new. For
+creates, send your own `id` too (16.1): a late replay then gets a harmless `409` instead of
+a duplicate. For deletes, a late replay of something already gone gets `404` — also treat
+that as success.
+
+Signup, login and refresh ignore this header. Account creation is already protected by
+the unique email.
+
+### 16.3 `GET /api/sync`
+
+```http
+GET /api/sync                                  # first run: everything
+GET /api/sync?since=2026-09-14T17:18:37.795Z   # later: only changes
+GET /api/sync?since=…&placeId=<id>             # optional: one place only
+```
+
+```json
+{
+  "serverTime": "2026-09-14T17:18:37.795Z",
+  "places":   [ { "id": "…", "name": "Home — Demo", "updatedAt": "…" } ],
+  "storages": [ { "id": "…", "parentId": "…", "path": "…", "level": 1, "labelCode": "FMS-…" } ],
+  "items":    [ { "id": "…", "storageId": "…", "visibility": "SHARED" } ],
+  "deleted":  { "places": [], "storages": [], "items": ["bd574989-…"] },
+  "truncated": false
+}
+```
+
+`places`, `storages` and `items` hold **full rows** for everything created or changed — the
+same fields as the list endpoints. `deleted` holds only ids. Nothing appears in both.
+
+**The cursor rule — the one that matters most**
+
+Store `serverTime` from each response and send it back as `since` on the next call.
+**Never use the device clock.** Phones drift by seconds or minutes, and a clock that runs
+ahead silently skips changes.
+
+**When `truncated` is `true`**
+
+Each list returns at most 1000 rows per call. When one is cut short, `truncated` is `true`
+and `serverTime` is set to a cutoff up to which **every** list is complete — not the real
+time. Call again straight away with that `serverTime`, and repeat until `truncated` is
+`false`. Don't resend the `since` you just used: that returns the same page again.
+
+The follow-up call may repeat a few rows you already have. Upsert by `id` and it's harmless.
+Rows that share a timestamp — deleting a storage marks its whole subtree deleted in one
+write — are never split across two pages, so none can be skipped.
+
+**Applying a response**
+
+```ts
+async function applySync(res: SyncResponse) {
+  await db.transaction(async (tx) => {
+    // Upserts first: parents before children.
+    await tx.places.bulkPut(res.places);
+    await tx.storages.bulkPut(res.storages);
+    await tx.items.bulkPut(res.items);
+    // Then deletions: children before parents.
+    await tx.items.bulkDelete(res.deleted.items);
+    await tx.storages.bulkDelete(res.deleted.storages);
+    await tx.places.bulkDelete(res.deleted.places);
+    // Advance the cursor only after everything above has been written.
+    await tx.meta.put({ key: 'syncCursor', value: res.serverTime });
+  });
+}
+
+async function syncUntilDone() {
+  let since = await db.meta.get('syncCursor');
+  do {
+    const res = await api.get('/sync', { params: since ? { since } : {} });
+    await applySync(res);
+    since = res.serverTime;
+    if (!res.truncated) break;
+  } while (true);
+}
+```
+
+Write the cursor in the same transaction as the data. If the app dies half-way through, the
+next sync redoes that page instead of skipping it.
+
+**Deletion cascades you'll see**
+
+- **Place deleted** — its storages and items are deleted at the same time, and all of their
+  ids arrive in `deleted`.
+- **Storage deleted** — its whole subtree is deleted. Items inside it are **not** deleted:
+  they become unassigned (`storageId: null`). As a safety net, treat any local item whose
+  `storageId` points to a storage you no longer have as unassigned.
+
+### 16.4 Two gaps incremental sync can't see — schedule a full resync
+
+Incremental sync reports what changed **inside the places you can currently see**. Two
+events remove data from your view without any change inside that view, so they never
+produce a deletion:
+
+1. **You lose access to a place** — removed by an admin, or you left on another device. The
+   place simply stops being synced; it is not listed in `deleted.places`.
+2. **Someone else's item becomes `PRIVATE`.** From then on it's hidden from you, as it
+   should be, but no deletion is sent, so your backup keeps the last copy you saw.
+
+The second is a privacy issue, not just a stale record. The fix for both is the same:
+
+> Periodically — say once a day, and whenever the app starts with a network connection —
+> run a **full** sync (omit `since`) and **delete anything local that the response doesn't
+> include**. Then store its `serverTime` as the cursor as usual.
+
+Also drop the whole backup on logout, and on account switch.
+
+The reverse cases need no special handling: a private item made shared, or a place you're
+newly added to, arrives as a normal change on the next incremental sync.
+
+### 16.5 Background worker and login tokens
+
+Your plan is right, and it matches how the backend behaves: **the worker must never refresh
+the token itself.**
+
+Refresh tokens rotate. Every `POST /auth/refresh` returns a new refresh token and invalidates
+the old one. If the worker and the main app refresh at the same time, one of them presents a
+token that has already been used. The server treats that as token theft and **revokes every
+session for the user on every device**.
+
+- Only the main thread ever calls `/auth/refresh`, behind the single in-flight lock from §3.
+- The worker holds only an access token. On `401`, it asks the main thread for a fresh one
+  (for example with `postMessage`), waits, and retries the same request once.
+- Queued replays keep their `Idempotency-Key` across that retry, so waiting for a token never
+  causes a duplicate.
+
+### 16.6 Limits that apply to sync
+
+- `GET /sync` counts against the normal 300 requests/minute limit. Sync every few minutes
+  or on reconnect; don't poll every second.
+- It respects exactly the same visibility rules as every other endpoint. Tested with the
+  seeded accounts: a private item appears in the owner's sync and never in the family
+  member's — neither when created nor in `deleted` when removed.
