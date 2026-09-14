@@ -20,16 +20,27 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   /**
-   * Retries the initial connection with backoff, and lets the app start even if
-   * every attempt fails.
+   * Kicks off the connection retry in the background — deliberately NOT
+   * awaited.
    *
-   * A scale-to-zero database (Neon's free tier suspends after ~5 minutes idle)
-   * is briefly unreachable while it wakes. Treating that as fatal would exit the
-   * process, and the platform would serve 502s until someone redeployed by hand.
-   * Prisma connects lazily on first query anyway, so a failed pre-connect costs
-   * only a slower first request, not correctness.
+   * Nest does not call app.listen() until every module's onModuleInit has
+   * resolved. Awaiting a multi-attempt retry loop here means a slow database
+   * — a scale-to-zero database waking up, say — blocks the HTTP port from
+   * opening at all for the full retry window (which, chained with Prisma's
+   * own internal pool timeout, can be a minute or more). That is worse than
+   * the problem it was meant to solve: instead of a fast response reporting
+   * degraded health, nothing is listening on the port and every request
+   * — including the platform's own health check — gets connection-refused.
+   *
+   * Prisma also connects lazily on first query, so a slow or failed
+   * pre-connect costs nothing beyond a warning log; it was never required for
+   * correctness.
    */
-  async onModuleInit() {
+  onModuleInit() {
+    void this.connectWithRetry();
+  }
+
+  private async connectWithRetry(): Promise<void> {
     for (let attempt = 1; attempt <= CONNECT_ATTEMPTS; attempt += 1) {
       try {
         await this.$connect();
@@ -41,7 +52,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
         if (attempt === CONNECT_ATTEMPTS) {
           this.logger.error(
             `Could not reach the database after ${CONNECT_ATTEMPTS} attempts: ${message}. ` +
-              'Starting anyway; queries will reconnect on demand.',
+              'The server is still up; queries will reconnect on demand.',
           );
           return;
         }

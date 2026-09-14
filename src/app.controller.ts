@@ -14,6 +14,9 @@ export class HealthResponse {
   timestamp!: string;
 }
 
+/** Below this, a slow database is reported as "down" rather than hanging the response. */
+const DB_CHECK_TIMEOUT_MS = 2500;
+
 @ApiTags('health')
 @Controller()
 export class AppController {
@@ -26,11 +29,27 @@ export class AppController {
   async health() {
     let database = 'up';
     try {
-      await this.prisma.$queryRaw`SELECT 1`;
+      // A liveness check must answer "is the HTTP server responsive" — it
+      // must never block on a slow downstream dependency. Neon (or any
+      // scale-to-zero database) can take several seconds to wake, and
+      // without a bound here that wait becomes the response time. If it
+      // exceeds the platform's own health-check timeout, the platform
+      // concludes the *server* is frozen and restarts the container —
+      // right as the database was about to come back, turning one slow
+      // wake-up into a repeating restart loop.
+      await Promise.race([
+        this.prisma.$queryRaw`SELECT 1`,
+        new Promise((_resolve, reject) =>
+          setTimeout(() => reject(new Error('db check timed out')), DB_CHECK_TIMEOUT_MS),
+        ),
+      ]);
     } catch {
       database = 'down';
     }
 
+    // Always 200: this endpoint reports the server is alive, which it is
+    // regardless of database state. "degraded" in the body is the signal
+    // for a human or a dashboard, not a reason to fail the platform's check.
     return {
       status: database === 'up' ? 'ok' : 'degraded',
       database,
