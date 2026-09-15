@@ -74,8 +74,9 @@ services:
       # deploy, restart and wake from sleep, which lost uploaded photos.
       - key: MEDIA_DRIVER
         value: s3
+      # Must match the bucket name exactly as shown in Neon -> Object storage.
       - key: MEDIA_S3_BUCKET
-        value: assets
+        value: storage-and-things
       - key: MEDIA_S3_PREFIX
         value: media
       - key: MEDIA_S3_FORCE_PATH_STYLE
