@@ -70,8 +70,26 @@ services:
       - key: SWAGGER_ENABLED
         value: 'true'
 
+      # Images go to object storage: Render's own disk is wiped on every
+      # deploy, restart and wake from sleep, which lost uploaded photos.
       - key: MEDIA_DRIVER
-        value: local
+        value: s3
+      - key: MEDIA_S3_BUCKET
+        value: assets
+      - key: MEDIA_S3_PREFIX
+        value: media
+      - key: MEDIA_S3_FORCE_PATH_STYLE
+        value: 'true'
+      # Object storage credentials — set these in the Render dashboard.
+      # With MEDIA_DRIVER=s3 the app refuses to boot until all four are set.
+      - key: AWS_REGION
+        sync: false
+      - key: AWS_ENDPOINT_URL_S3
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
       - key: MEDIA_LOCAL_PATH
         value: ./storage/media
       - key: MEDIA_MAX_BYTES
