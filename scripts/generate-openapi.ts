@@ -19,6 +19,10 @@ import * as path from 'node:path';
 process.env.DATABASE_URL ||= 'postgresql://placeholder:placeholder@localhost:5432/placeholder';
 process.env.JWT_ACCESS_SECRET ||= 'placeholder-secret-for-openapi-generation-only';
 process.env.JWT_REFRESH_SECRET ||= 'placeholder-secret-for-openapi-generation-only';
+// Forced, not defaulted: a developer's .env with MEDIA_DRIVER=s3 would
+// otherwise demand real storage credentials just to describe the routes.
+// Where images are stored does not change the API contract.
+process.env.MEDIA_DRIVER = 'local';
 
 async function generate() {
   const { AppModule } = await import('../src/app.module');

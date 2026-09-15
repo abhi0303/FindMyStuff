@@ -595,6 +595,18 @@ Responses are `Cache-Control: private, max-age=86400`, so cache aggressively.
 
 The same photo uploaded twice is deduplicated by checksum and returns the existing id.
 
+**Where images live.** Image bytes are stored in S3-compatible object storage, not in the
+database and not on the API server's disk. Nothing about this changes the contract: you still
+upload base64, still get a media id, and still load it from `/media/{id}/raw` and
+`/media/{id}/thumbnail` with the auth header. The bucket is private and never exposed to the
+client, so the same membership and PRIVATE-item checks apply to every image.
+
+**Handle a 404 on an image.** Images uploaded *before* the move to object storage were saved to
+the old server's disk, which a deploy has since wiped. Their media ids still exist, but the
+bytes are gone and `/raw` and `/thumbnail` return `404 Media file is unavailable`. Render a
+placeholder instead of a broken image, and let the user re-attach a photo. Re-uploading the
+same picture now creates a fresh, working copy.
+
 ---
 
 ## 12. Reminders dashboard

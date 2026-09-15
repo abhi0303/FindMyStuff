@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 // Type-only: erased at compile time, so this costs nothing at runtime and
 // does not pull in sharp's native addon — the dynamic import below does that,
 // deliberately deferred to first use.
@@ -6,9 +12,8 @@ import type { Metadata } from 'sharp';
 import { ConfigService } from '@nestjs/config';
 import { MemberStatus, Media, Visibility } from '@prisma/client';
 import { createHash, randomUUID } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import * as path from 'node:path';
 import { PrismaService } from '../prisma/prisma.service';
+import { MEDIA_STORAGES, MediaStorage } from './storage/media-storage';
 
 const ALLOWED_FORMATS: Record<string, string> = {
   jpeg: 'image/jpeg',
@@ -26,10 +31,19 @@ export class MediaService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
+    @Inject(MEDIA_STORAGES) private readonly storages: Map<string, MediaStorage>,
   ) {}
 
-  private get root(): string {
-    return path.resolve(this.config.getOrThrow<string>('media.localPath'));
+  /** Where new uploads go, per MEDIA_DRIVER. */
+  private get writer(): MediaStorage {
+    const driver = this.config.getOrThrow<string>('media.driver');
+    const storage = this.storages.get(driver);
+    if (!storage) {
+      // Env validation already refuses to boot in this state; this is only a
+      // guard against the two drifting apart.
+      throw new Error(`Media driver "${driver}" is not configured`);
+    }
+    return storage;
   }
 
   /**
@@ -68,9 +82,9 @@ export class MediaService {
   }
 
   /**
-   * Base64 comes in from the apps, but is decoded and written to disk. Only a
-   * small row goes into the database, so listing items never drags image bytes
-   * along with it.
+   * Base64 comes in from the apps, but is decoded and written to the
+   * configured storage (object storage in production). Only a small row goes
+   * into the database, so listing items never drags image bytes along with it.
    */
   async createFromBase64(userId: string, base64: string): Promise<Media> {
     const buffer = this.decodeBase64(base64);
@@ -98,19 +112,19 @@ export class MediaService {
     }
 
     const checksum = createHash('sha256').update(buffer).digest('hex');
+    const writer = this.writer;
 
-    // The same photo uploaded twice reuses the stored file.
+    // The same photo uploaded twice reuses the stored file — but only one
+    // stored by the CURRENT driver. A row from the old disk driver on Render
+    // points at a file that a deploy has already wiped; handing that id back
+    // would give the new upload a permanently broken image.
     const existing = await this.prisma.media.findFirst({
-      where: { checksum, ownerId: userId, deletedAt: null },
+      where: { checksum, ownerId: userId, deletedAt: null, driver: writer.driver },
     });
     if (existing) return existing;
 
     const id = randomUUID();
-    const dir = path.join(this.root, id.slice(0, 2));
-    await mkdir(dir, { recursive: true });
-
-    const storageKey = path.join(id.slice(0, 2), `${id}.${format}`);
-    const thumbnailKey = path.join(id.slice(0, 2), `${id}.thumb.webp`);
+    const folder = id.slice(0, 2);
 
     const thumbnailWidth = this.config.getOrThrow<number>('media.thumbnailWidth');
     const thumbnail = await sharp(buffer)
@@ -119,16 +133,16 @@ export class MediaService {
       .webp({ quality: 80 })
       .toBuffer();
 
-    await Promise.all([
-      writeFile(path.join(this.root, storageKey), buffer),
-      writeFile(path.join(this.root, thumbnailKey), thumbnail),
+    const [storageKey, thumbnailKey] = await Promise.all([
+      writer.put(`${folder}/${id}.${format}`, buffer, mimeType),
+      writer.put(`${folder}/${id}.thumb.webp`, thumbnail, 'image/webp'),
     ]);
 
     return this.prisma.media.create({
       data: {
         id,
         ownerId: userId,
-        driver: this.config.getOrThrow<string>('media.driver'),
+        driver: writer.driver,
         storageKey,
         thumbnailKey,
         mimeType,
@@ -194,16 +208,23 @@ export class MediaService {
     const key =
       variant === 'thumbnail' ? (media.thumbnailKey ?? media.storageKey) : media.storageKey;
 
-    try {
-      const buffer = await readFile(path.join(this.root, key));
-      return {
-        buffer,
-        mimeType: variant === 'thumbnail' && media.thumbnailKey ? 'image/webp' : media.mimeType,
-      };
-    } catch (error) {
-      this.logger.error(`Missing media file for ${mediaId}: ${key}`, error as Error);
+    // Read from whichever driver WROTE this row, not the current one.
+    const storage = this.storages.get(media.driver);
+    if (!storage) {
+      this.logger.error(`Media ${mediaId} uses driver "${media.driver}", which is not configured`);
       throw new NotFoundException('Media file is unavailable');
     }
+
+    const buffer = await storage.get(key);
+    if (!buffer) {
+      this.logger.warn(`Missing media file for ${mediaId} (${media.driver}): ${key}`);
+      throw new NotFoundException('Media file is unavailable');
+    }
+
+    return {
+      buffer,
+      mimeType: variant === 'thumbnail' && media.thumbnailKey ? 'image/webp' : media.mimeType,
+    };
   }
 
   async metadata(userId: string, mediaId: string) {

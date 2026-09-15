@@ -16,6 +16,13 @@ export interface AppConfig {
     localPath: string;
     maxBytes: number;
     thumbnailWidth: number;
+    s3: {
+      bucket: string;
+      prefix: string;
+      region: string;
+      endpoint: string;
+      forcePathStyle: boolean;
+    };
   };
   throttle: {
     ttlSeconds: number;
@@ -58,6 +65,16 @@ export default (): AppConfig => ({
     localPath: process.env.MEDIA_LOCAL_PATH ?? './storage/media',
     maxBytes: int(process.env.MEDIA_MAX_BYTES, 8 * 1024 * 1024),
     thumbnailWidth: int(process.env.MEDIA_THUMBNAIL_WIDTH, 320),
+    // S3-compatible object storage (Neon object storage, AWS S3, R2, MinIO).
+    // Credentials are read by the AWS SDK from AWS_ACCESS_KEY_ID /
+    // AWS_SECRET_ACCESS_KEY, so they are deliberately not copied in here.
+    s3: {
+      bucket: process.env.MEDIA_S3_BUCKET ?? '',
+      prefix: process.env.MEDIA_S3_PREFIX ?? 'media',
+      region: process.env.AWS_REGION ?? '',
+      endpoint: process.env.AWS_ENDPOINT_URL_S3 ?? process.env.AWS_ENDPOINT_URL ?? '',
+      forcePathStyle: process.env.MEDIA_S3_FORCE_PATH_STYLE !== 'false',
+    },
   },
   throttle: {
     ttlSeconds: int(process.env.THROTTLE_TTL_SECONDS, 60),

@@ -165,9 +165,10 @@ In the Render dashboard: **New → Blueprint → pick this repo**. Set `CORS_ORI
 
 Three things about the free plan that will surprise you:
 
-1. **The filesystem is ephemeral.** Uploaded photos are written to disk by the `local` media
-   driver and are **wiped on every deploy and restart**. Fine for a demo, not for real use —
-   move to object storage (or a paid persistent disk) before anyone relies on it.
+1. **The filesystem is ephemeral**, so images do NOT go on the server's disk in production.
+   `render.yaml` sets `MEDIA_DRIVER=s3`, and uploads go to S3-compatible object storage
+   (Neon object storage). Set `AWS_REGION`, `AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID` and
+   `AWS_SECRET_ACCESS_KEY` in the Render dashboard — the app refuses to boot without them.
 2. **Free Postgres is deleted after 30 days.** Back up or upgrade before then.
 3. **Free services sleep after 15 minutes idle**, so the next request takes ~50s. Mobile clients
    need a generous timeout on the first call.
@@ -176,5 +177,5 @@ The blueprint deploys the `main` branch — change `branch:` in `render.yaml` to
 
 ## Not built yet
 
-Push notifications for reminders, S3 media driver, ownership transfer, item-level
+Push notifications for reminders, ownership transfer, item-level
 comments, and a `/sync` endpoint for offline clients.

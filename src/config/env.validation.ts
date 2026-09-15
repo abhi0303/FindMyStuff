@@ -1,5 +1,15 @@
 import { plainToInstance } from 'class-transformer';
-import { IsIn, IsNotEmpty, IsOptional, IsString, MinLength, validateSync } from 'class-validator';
+import {
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+  ValidateIf,
+  validateSync,
+} from 'class-validator';
+
+const usesS3 = (env: EnvironmentVariables) => env.MEDIA_DRIVER === 's3';
 
 class EnvironmentVariables {
   @IsOptional()
@@ -28,6 +38,32 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   TERMS_VERSION?: string;
+
+  @IsOptional()
+  @IsIn(['local', 's3'], { message: 'MEDIA_DRIVER must be "local" or "s3"' })
+  MEDIA_DRIVER?: string;
+
+  // With MEDIA_DRIVER=s3, a missing value would otherwise only surface as a
+  // failed upload much later — refuse to boot instead, naming what's missing.
+  @ValidateIf(usesS3)
+  @IsString()
+  @IsNotEmpty({ message: 'MEDIA_S3_BUCKET is required when MEDIA_DRIVER=s3' })
+  MEDIA_S3_BUCKET?: string;
+
+  @ValidateIf(usesS3)
+  @IsString()
+  @IsNotEmpty({ message: 'AWS_REGION is required when MEDIA_DRIVER=s3' })
+  AWS_REGION?: string;
+
+  @ValidateIf(usesS3)
+  @IsString()
+  @IsNotEmpty({ message: 'AWS_ACCESS_KEY_ID is required when MEDIA_DRIVER=s3' })
+  AWS_ACCESS_KEY_ID?: string;
+
+  @ValidateIf(usesS3)
+  @IsString()
+  @IsNotEmpty({ message: 'AWS_SECRET_ACCESS_KEY is required when MEDIA_DRIVER=s3' })
+  AWS_SECRET_ACCESS_KEY?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {
